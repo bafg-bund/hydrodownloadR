@@ -1,6 +1,6 @@
 Package: hydrodownloadR
 Title: Hydrological Station Catalogs and Time Series from Public APIs
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: c(
      person("Henning", "Plessow", role = c("aut", "cre"),
             email = "h.plessow@googlemail.com"),
