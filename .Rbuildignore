@@ -1,4 +1,5 @@
 ^hydrodownloadR\.Rproj$
+^\.Renviron$
 ^\.Rproj\.user$
 ^_pkgdown\.yml$
 ^docs$

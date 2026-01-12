@@ -15,7 +15,7 @@ get_stations <- function(provider_id) {
 #' Convenience: fetch time series by provider_id
 #' @export
 get_timeseries <- function(provider_id,
-                           parameter = c("water_discharge","water_level","water_temperature"),
+                           parameter = c("water_discharge","water_level","water_temperature","water_velocity"),
                            stations = NULL,
                            start_date = NULL, end_date = NULL,
                            mode = c("range","complete")) {

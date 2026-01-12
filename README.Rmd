@@ -16,39 +16,33 @@ knitr::opts_chunk$set(
 # hydrodownloadR
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/bafg-bund/hydrodownloadR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bafg-bund/hydrodownloadR/actions/workflows/R-CMD-check.yaml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-The goal of hydrodownloadR is to ...
+**hydrodownloadR** provides a unified, extensible interface for discovering hydrological
+stations and downloading daily time series (water discharge, water level,
+water temperature, flow velocity) from national/regional public APIs. The package
+uses a provider registry with identifiers (`provider_id`, `provider_name`) and
+S3 generics `stations()` / `timeseries()`. It supports complete histories
+(1900-01-01 → today), per-station selection, rate limiting & retries, optional
+auth via environment variables, UTF-8→ASCII normalization, and coordinate
+transformation to WGS84.
+
+> Built for reproducible workflows and easy addition of new providers.
+
+---
 
 ## Installation
 
-You can install the development version of hydrodownloadR like so:
+### Development version (GitHub)
 
-``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
-```
+```r
+# Option A: remotes
+install.packages("remotes")
+remotes::install_github("bafg-bund/hydrodownloadR")
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-```{r example}
-library(hydrodownloadR)
-## basic example code
-```
-
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+# Option B: pak (fast)
+install.packages("pak")
+pak::pak("bafg-bund/hydrodownloadR")
