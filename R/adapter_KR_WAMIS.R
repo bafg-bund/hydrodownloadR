@@ -44,7 +44,7 @@
 register_KR_WAMIS <- function() {
   register_service(
     provider_id   = "KR_WAMIS",
-    provider_name = "South Korea – Wter Management Information System (WAMIS) Open API",
+    provider_name = "South Korea – Water Management Information System (WAMIS) Open API",
     country       = "KR",
     base_url      = "http://www.wamis.go.kr:8444/wamis/openapi",
     rate_cfg      = list(n = 5L, period = 1),  # up to 5 req / second

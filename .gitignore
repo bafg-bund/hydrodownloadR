@@ -1,9 +1,26 @@
-.Rproj.user
-docs
-.Renviron
+# RStudio / R
+.Rproj.user/
 .Rhistory
+.Rapp.history
+.RData
 .Rdata
-.httr-oauth
-.DS_Store
-.quarto
+.Ruserdata
+.Renviron
 
+# OS/editor
+.DS_Store
+.httr-oauth
+.quarto/
+
+# Build artifacts
+*.Rcheck/
+*.tar.gz
+inst/doc/
+
+# pkgdown (only ignore if you deploy via gh-pages)
+/docs/
+
+# Keep raw data scripts but ignore big inputs
+data-raw/*
+!data-raw/*.R
+!data-raw/README*
