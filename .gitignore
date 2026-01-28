@@ -24,3 +24,4 @@ inst/doc/
 data-raw/*
 !data-raw/*.R
 !data-raw/README*
+release-assets/*
