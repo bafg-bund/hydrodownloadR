@@ -1,15 +1,17 @@
-# ==== Argentina – INA Alerta5 adapter =======================================
+# ==== Argentina - INA Alerta5 adapter =======================================
 
 # If %||% is not already defined in your package, uncomment this:
 # `%||%` <- function(x, y) if (is.null(x) || (is.atomic(x) && length(x) == 0L)) y else x
 
 # -- Service registration -----------------------------------------------------
 
+#' @keywords internal
+#' @noRd
 register_AR_INA <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "AR_INA",
-    provider_name = "Argentina – INA Alerta5 API",
-    country       = "AR",
+    provider_name = "INA Alerta5 API",
+    country       = "Argentina",
     base_url      = "https://alerta.ina.gob.ar/a5",
     geo_base_url  = NULL,
     rate_cfg      = list(n = 3, period = 1),  # conservative default
@@ -318,7 +320,7 @@ timeseries.hydro_service_AR_INA <- function(x,
     tibble::tibble(
       country       = x$country %||% "AR",
       provider_id   = x$provider_id,
-      provider_name = x$provider_name %||% "Argentina – INA Alerta5 API",
+      provider_name = x$provider_name %||% "Argentina - INA Alerta5 API",
       station_id    = m$station_id,
       parameter     = parameter,
       timestamp     = ts$time,

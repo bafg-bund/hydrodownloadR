@@ -10,7 +10,7 @@
 #   contains a link to a yearly .dat file under /dat/dload/download/*.dat.
 #   The .dat file encodes daily values per month:
 #     - One line per month
-#     - First field: month indicator (e.g. "1ŒŽ")
+#     - First field: month indicator (e.g. "1EZ")
 #     - Remaining fields: value, flag, value, flag, ...
 #   We:
 #     - detect the .dat link from the HTML
@@ -28,12 +28,13 @@
 
 # ---- registration ------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_JP_MLIT <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "JP_MLIT",
-    provider_name = "Japan – Ministry of Land, Infrastructure, Transport and Tourism (MLIT)",
-    country       = "JP",
+    provider_name = "Ministry of Land, Infrastructure, Transport and Tourism (MLIT)",
+    country       = "Japan",
     base_url      = "http://www1.river.go.jp",
     # Be conservative here; the CGI is not a modern bulk API.
     rate_cfg      = list(n = 1, period = 1),
@@ -78,28 +79,22 @@ timeseries_parameters.hydro_service_JP_MLIT <- function(x, ...) {
 stations.hydro_service_JP_MLIT <- function(x,
                                            stations = NULL,
                                            ...) {
-  # jp_mlit_meta is loaded from data/jp_mlit_meta.rda
-  if (!exists("jp_mlit_meta", inherits = FALSE)) {
-    path <- system.file("data", "jp_mlit_meta.rda", package = "hydrodownloadR")
-    if (!nzchar(path)) {
-      # Fallback for dev environment where system.file may not see it
-      alt_path <- "data/jp_mlit_meta.rda"
-      if (file.exists(alt_path)) {
-        path <- alt_path
-      } else {
-        stop(
-          "JP_MLIT: could not find 'jp_mlit_meta.rda'. ",
-          "Make sure you ran data-raw/jp_mlit_meta_build.R and the file ",
-          "exists in data/jp_mlit_meta.rda."
-        )
-      }
-    }
-    load(path, envir = environment())
+  # ---------------------------------------------------------------------------
+  # Load precomputed station metadata (jp_mlit_meta) via .pkg_data()
+  # ---------------------------------------------------------------------------
+  ms <- .pkg_data("jp_mlit_meta")
+
+  if (is.null(ms)) {
+    rlang::abort(
+      "JP_MLIT: internal dataset 'jp_mlit_meta' not found. ",
+      "Make sure you ran data-raw/jp_mlit_meta_build.R so that ",
+      "data/jp_mlit_meta.rda is available."
+    )
   }
 
-  ms <- jp_mlit_meta
-
-  # Optional filter by station_id ---------------------------------------------
+  # ---------------------------------------------------------------------------
+  # Optional filter by station_id argument
+  # ---------------------------------------------------------------------------
   if (!is.null(stations)) {
     stations_chr <- unique(as.character(stations))
     ms <- ms[ms$station_id %in% stations_chr, , drop = FALSE]
@@ -114,7 +109,9 @@ stations.hydro_service_JP_MLIT <- function(x,
     }
   }
 
-  # Empty template if nothing left --------------------------------------------
+  # ---------------------------------------------------------------------------
+  # Empty template if no stations left
+  # ---------------------------------------------------------------------------
   if (!nrow(ms)) {
     return(tibble::tibble(
       country       = character(),
@@ -130,13 +127,15 @@ stations.hydro_service_JP_MLIT <- function(x,
     ))
   }
 
-  # Final output: x$ fields first, then station fields ------------------------
+  # ---------------------------------------------------------------------------
+  # Final output: x$ fields first, then station fields
+  # ---------------------------------------------------------------------------
   tibble::tibble(
     country       = x$country,
     provider_id   = x$provider_id,
     provider_name = x$provider_name,
     station_id    = ms$station_id,
-    station_name  = ms$station_name,  # English (from jp_mlit_meta)
+    station_name  = ms$station_name,  # English from jp_mlit_meta
     river         = ms$river,         # English watersystem/river name
     lat           = ms$lat,
     lon           = ms$lon,
@@ -144,6 +143,7 @@ stations.hydro_service_JP_MLIT <- function(x,
     altitude      = ms$altitude
   )
 }
+
 
 
 # ---- internal helper ---------------------------------------------------------
@@ -321,7 +321,7 @@ stations.hydro_service_JP_MLIT <- function(x,
     }
   }
 
-  # Month rows: start with 1–2 digits (month number) + a non-digit (ŒŽ, 月, …)
+  # Month rows: start with 1-2 digits (month number) + a non-digit
   month_idx <- grep("^\\s*[0-9]{1,2}[^0-9]", lines)
   if (!length(month_idx)) {
     rlang::warn(
@@ -339,7 +339,6 @@ stations.hydro_service_JP_MLIT <- function(x,
 
     if (!length(parts)) return(tibble::tibble())
 
-    # First entry: "1ŒŽ", "2ŒŽ", "1月", etc. -> numeric month
     month <- suppressWarnings(
       as.integer(sub("^\\s*([0-9]{1,2}).*", "\\1", parts[1]))
     )
@@ -495,7 +494,7 @@ timeseries.hydro_service_JP_MLIT <- function(
         provider_name  = x$provider_name,
         station_id     = st_id,
         parameter      = parameter,
-        # Daily values – store as UTC midnights; original is JST but date-only
+        # Daily values - store as UTC midnights; original is JST but date-only
         timestamp      = as.POSIXct(df$Date, tz = "UTC"),
         value          = df$Value,
         unit           = pm$unit,

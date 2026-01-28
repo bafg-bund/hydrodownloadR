@@ -3,10 +3,10 @@
 #   - Live station metadata from XML feed:
 #       http://www.arso.gov.si/xml/vode/hidro_podatki_zadnji.xml
 #     One <postaja> per station, attributes:
-#       sifra         – station code
-#       wgs84_dolzina – longitude (decimal degrees, WGS84)
-#       wgs84_sirina  – latitude  (decimal degrees, WGS84)
-#       kota_0        – gauge zero (m a.s.l.)
+#       sifra         - station code
+#       wgs84_dolzina - longitude (decimal degrees, WGS84)
+#       wgs84_sirina  - latitude  (decimal degrees, WGS84)
+#       kota_0        - gauge zero (m a.s.l.)
 #     Child elements:
 #       <reka>, <merilno_mesto>, <ime_kratko>, ...
 #     We derive:
@@ -48,12 +48,13 @@
 # Registration
 # -----------------------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_SI_ARSO <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "SI_ARSO",
-    provider_name = "Slovenia – ARSO hydrological archive",
-    country       = "SI",
+    provider_name = "ARSO hydrological archive",
+    country       = "Slovenia",
     base_url      = "https://vode.arso.gov.si",
     rate_cfg      = list(n = 1L, period = 1),  # 1 request / second
     auth          = list(type = "none")
@@ -80,13 +81,13 @@ timeseries_parameters.hydro_service_SI_ARSO <- function(x, ...) {
       mult  = 1
     ),
     water_level = list(
-      par   = "^vodostaj",            # "vodostaj (cm)" → m
+      par   = "^vodostaj",            # "vodostaj (cm)" to m
       unit  = "m",
-      mult  = 0.01                    # cm → m
+      mult  = 0.01                    # cm to m
     ),
     water_temperature = list(
-      par   = "temp.*vode",           # "temp. vode (°C)"
-      unit  = "degC",
+      par   = "temp.*vode",           # "temp. vode (\u00B0C)"
+      unit  = "\u00B0C",
       mult  = 1
     ),
     suspended_sediment_transport = list(
@@ -261,7 +262,7 @@ stations.hydro_service_SI_ARSO <- function(x, ...) {
       file             = con,
       header           = TRUE,
       sep              = ";",    # read.csv2 default
-      dec              = ",",    # read.csv2 default – matches SI locale
+      dec              = ",",    # read.csv2 default - matches SI locale
       stringsAsFactors = FALSE,
       check.names      = FALSE
     ),

@@ -1,4 +1,4 @@
-# ==== Belgium (Wallonia, SPW Hydrométrie — KiWIS) adapter =====================
+# ==== Belgium (Wallonia, SPW Hydrom\u00E9trie - KiWIS) adapter =====================
 # Provider: BE_WAL
 # Base URL: https://hydrometrie.wallonie.be/services/KiWIS/KiWIS
 # Scope: water_discharge (daily), water_level (daily)
@@ -13,12 +13,13 @@
 
 # ---- registration ------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_BE_WAL <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "BE_WAL",
-    provider_name = "Belgium – SPW Hydrométrie (Wallonia, KiWIS)",
-    country       = "BE",
+    provider_name = "SPW Hydrom\u00E9trie (Wallonia, KiWIS)",
+    country       = "Belgium",
     base_url      = "https://hydrometrie.wallonie.be/services/KiWIS/KiWIS",
     rate_cfg      = list(n = 1, period = 5),  # polite: 1 req / 5 s
     auth          = list(type = "none")
@@ -78,7 +79,7 @@ stations.hydro_service_BE_WAL <- function(x, ...) {
   riv       <- col_or_null(df, "river_name")
   lat_chr   <- col_or_null(df, "station_latitude")
   lon_chr   <- col_or_null(df, "station_longitude")
-  area_km2  <- .be_parse_km2_numeric(col_or_null(df, "CATCHMENT_SIZE"))
+  area_km2  <- parse_area_km2(col_or_null(df, "CATCHMENT_SIZE"))
   alt_chr   <- col_or_null(df, "station_gauge_datum")
   vdatum_raw <- col_or_null(df, "station_gauge_datum_unit")
 
@@ -240,7 +241,7 @@ timeseries.hydro_service_BE_WAL <- function(x,
         return(tibble::as_tibble(df, .name_repair = "minimal"))
       }
 
-      # Case B: datasource=0 — header-first 2D array/matrix
+      # Case B: datasource=0 - header-first 2D array/matrix
       if (!is.null(dim(js)) && nrow(js) >= 2) {
         hdr <- as.character(js[1, , drop = TRUE])
         dat <- js[-1, , drop = FALSE]
@@ -274,7 +275,7 @@ timeseries.hydro_service_BE_WAL <- function(x,
     }
     ts_raw <- df[[ts_col]]
 
-    # 2) Value — prefer explicit "Value", else first non-timestamp numeric-ish column
+    # 2) Value - prefer explicit "Value", else first non-timestamp numeric-ish column
     val_col <- pick_col(df, c("Value","value"))
     if (is.null(val_col)) {
       # find first column that is not the timestamp and looks numeric

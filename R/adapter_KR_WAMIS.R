@@ -1,52 +1,19 @@
-# ==== South Korea (WAMIS) adapter ============================================
-# Stations:
-#   - WAMIS water level observatories list:
-#       http://www.wamis.go.kr:8444/wamis/openapi/wkw/wl_dubwlobs
-#     Returns a list of observatory codes (obscd).
-#
-#   - Detailed observatory metadata:
-#       http://www.wamis.go.kr:8444/wamis/openapi/wkw/wl_obsinfo?obscd=XXXX
-#     Provides:
-#       - wlobscd  : gauge id
-#       - obsnmeng : station name (English)
-#       - rivnm    : river name
-#       - lat, lon : coordinates in D-M-S format "DDD-MM-SS"
-#       - gdt      : zero-level elevation (EL.m)
-#       - bsnara   : catchment area (km²)
-#
-#   Coordinates are converted from DMS to decimal degrees (WGS84).
-#
-# Time series:
-#   - Daily discharge (flow, m³/s):
-#       http://www.wamis.go.kr:8444/wamis/openapi/wkw/flw_dtdata
-#       Parameters:
-#         obscd = gauge id
-#         year  = YYYY
-#         output= json
-#       Fields:
-#         ymd : date (YYYYMMDD)
-#         fw  : discharge (m³/s)
-#
-#   We loop by year between start_date and end_date and then
-#   filter to the requested date range in R.
-#
-# Notes:
-#   - Adapter currently exposes only parameter = "water_discharge".
-#   - Station metadata from WAMIS water-level metadata endpoint; discharge
-#     series from WAMIS discharge endpoint.
-#   - Daily data are returned with timestamp at midnight UTC.
-
+# NOTE (2025-01-27):
+  #   WAMIS Open API endpoints return HTTP 403 when called from BfG network
+  #   (federal firewall / proxy restriction). Adapter kept for future use,
+  #   but NOT registered in production hydro_services() at the moment.
 # -----------------------------------------------------------------------------
 # Registration
 # -----------------------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_KR_WAMIS <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "KR_WAMIS",
-    provider_name = "South Korea – Water Management Information System (WAMIS) Open API",
-    country       = "KR",
-    base_url      = "http://www.wamis.go.kr:8444/wamis/openapi",
+    provider_name = "Water Management Information System (WAMIS) Open API",
+    country       = "South Korea",
+    base_url      = "http://www.wamis.go.kr:8080/wamis/openapi",
     rate_cfg      = list(n = 5L, period = 1),  # up to 5 req / second
     auth          = list(type = "none")
   )
@@ -94,24 +61,54 @@ timeseries_parameters.hydro_service_KR_WAMIS <- function(x, ...) {
 }
 
 .kr_wamis_station_list_json <- function(x) {
-  base_url <- .kr_wamis_base_url(x)
-  url      <- paste0(base_url, "/wkw/wl_dubwlobs")
+  # We know this works in the browser:
+  # http://www.wamis.go.kr:8080/wamis/openapi/wkw/wl_dubwlobs?basin=1&oper=y&output=json
 
-  req <- httr2::request(url) |>
-    httr2::req_url_query(output = "json") |>
-    httr2::req_user_agent(
-      "hydrodownloadR (+https://github.com/your-org/hydrodownloadR)"
+  req <- build_request(
+    x,
+    path   = "wkw/wl_dubwlobs",
+    query  = list(
+      basin  = "1",
+      oper   = "y",
+      output = "json"
     )
+  )
 
-  resp <- try(perform_request(req), silent = TRUE)
-  if (inherits(resp, "try-error")) {
-    rlang::abort("KR_WAMIS: failed to fetch wl_dubwlobs station list.")
+  # Use tryCatch so we can surface the underlying error
+  resp <- tryCatch(
+    perform_request(req),
+    error = function(e) {
+      rlang::abort(
+        paste0(
+          "KR_WAMIS: wl_dubwlobs request failed for basin=1 (",
+          conditionMessage(e),
+          ")"
+        )
+      )
+    }
+  )
+
+
+  # If perform_request() *didn't* throw but status is 4xx/5xx, check manually:
+  status <- tryCatch(httr2::resp_status(resp), error = function(e) NA_integer_)
+  if (identical(status, 403L)) {
+    body_txt <- tryCatch(
+      httr2::resp_body_string(resp),
+      error = function(e) "<could not read body>"
+    )
+    # Show only a short snippet to avoid dumping a whole HTML page
+    snippet <- substr(body_txt, 1L, 300L)
+    rlang::abort(paste0(
+      "KR_WAMIS: HTTP 403 Forbidden for wl_dubwlobs. ",
+      "Response body (first 300 chars): ", snippet
+    ))
   }
 
   body <- try(
     httr2::resp_body_json(resp, simplifyVector = TRUE),
     silent = TRUE
   )
+
   if (inherits(body, "try-error") || !is.list(body) || is.null(body$list)) {
     rlang::abort("KR_WAMIS: unexpected JSON structure for wl_dubwlobs.")
   }

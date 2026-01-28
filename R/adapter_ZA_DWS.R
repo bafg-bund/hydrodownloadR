@@ -32,12 +32,13 @@
 # Registration
 # -----------------------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_ZA_DWS <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "ZA_DWS",
-    provider_name = "South Africa – Department of Water and Sanitation (Verified)",
-    country       = "ZA",
+    provider_name = "Department of Water and Sanitation (Verified)",
+    country       = "South Africa",
     base_url      = "https://www.dws.gov.za/hydrology/Verified",
     rate_cfg      = list(n = 1L, period = 1),  # 1 request / second
     auth          = list(type = "none")

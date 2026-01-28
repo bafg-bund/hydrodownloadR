@@ -1,4 +1,4 @@
-# ==== Spain (ROAN – Anuario de Aforos) adapter ===============================
+# ==== Spain (ROAN - Anuario de Aforos) adapter ===============================
 # Stations:
 #   - Station list (rivers only) provided as a ZIP of CSVs:
 #       https://www.miteco.gob.es/content/dam/miteco/es/agua/temas/
@@ -7,12 +7,12 @@
 #     We extract the CSV whose name contains "Situac" and "Rio" (e.g.
 #     "Situac_estaciones_aforo_Rio.csv").
 #   - Columns used (based on ROAN/SAIH-ROEA schema):
-#       COD_HIDRO      → station_id
-#       NOM_ANUARIO    → station_name
-#       RIO            → river
-#       COTA_Z         → altitude (m)
-#       CUENCA_TOTAL   → area (km2)
-#       COORD_UTMX_H30_ETRS89 / COORD_UTMY_H30_ETRS89 → UTM ETRS89 / 30N
+#       COD_HIDRO      to station_id
+#       NOM_ANUARIO    to station_name
+#       RIO            to river
+#       COTA_Z         to altitude (m)
+#       CUENCA_TOTAL   to area (km2)
+#       COORD_UTMX_H30_ETRS89 / COORD_UTMY_H30_ETRS89 to UTM ETRS89 / 30N
 #     We convert UTM ETRS89 (zone 30) coordinates to WGS84 (EPSG:4326).
 #
 # Time series:
@@ -25,16 +25,16 @@
 #       valores = "{gauge_id}|{start_year}|{end_year}"
 #       origen  = 1008
 #   - Service returns an HTML table with columns:
-#       "Estación", "Ano", "Día", "Oct", "Nov", "Dic", "Ene", ..., "Sep"
+#       "Estacion", "Ano", "Dia", "Oct", "Nov", "Dic", "Ene", ..., "Sep"
 #     where "Ano" is a hydrological year like "2019-20",
-#     months Oct–Dec belong to the first calendar year, Jan–Sep to the next.
+#     months Oct-Dec belong to the first calendar year, Jan-Sep to the next.
 #   - Values are stored as integers (e.g. 074 = 0.74 m3/s), so we divide by 100.
-#   - We always request a year span that covers the user’s requested date range,
+#   - We always request a year span that covers the user's requested date range,
 #     then filter by date in R (like your CL_DGA adapter).
 #
 # Notes:
 #   - Adapter exposes only parameter = "water_discharge".
-#   - Station metadata comes from the MITECO “listado-estaciones-aforo” ZIP.
+#   - Station metadata comes from the MITECO "listado-estaciones-aforo" ZIP.
 #   - Daily data are returned with a `timestamp` at midnight UTC.
 #   - Coordinates are assumed to be ETRS89 / UTM zone 30N (EPSG:25830) and
 #     transformed to WGS84 / EPSG:4326.
@@ -43,12 +43,13 @@
 # Registration
 # -----------------------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_ES_ROAN <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "ES_ROAN",
-    provider_name = "Spain – ROAN (Anuario de Aforos, MITECO)",
-    country       = "ES",
+    provider_name = "ROAN (Anuario de Aforos, MITECO)",
+    country       = "Spain",
     base_url      = "https://sig.mapama.gob.es/WebServices/clientews/redes-seguimiento",
     rate_cfg      = list(n = 1L, period = 1),  # 1 request / second
     auth          = list(type = "none")
@@ -129,7 +130,7 @@ timeseries_parameters.hydro_service_ES_ROAN <- function(x, ...) {
   raw
 }
 
-# Convert ETRS89 / UTM zone 30N (EPSG:25830) → WGS84 (EPSG:4326).
+# Convert ETRS89 / UTM zone 30N (EPSG:25830) to WGS84 (EPSG:4326).
 .es_roan_utm30_to_wgs84 <- function(east, north) {
   east  <- suppressWarnings(as.numeric(east))
   north <- suppressWarnings(as.numeric(north))
@@ -359,7 +360,7 @@ stations.hydro_service_ES_ROAN <- function(x, ...) {
   df_long$Ano_ini <- ano_ini
   df_long$Ano_fin <- ano_fin
 
-  # Determine real calendar year based on month (Oct–Dec vs Jan–Sep)
+  # Determine real calendar year based on month (Oct-Dec vs Jan-Sep)
   df_long$year <- ifelse(df_long$Mes_num >= 10L, df_long$Ano_ini, df_long$Ano_fin)
 
   # Day of month
@@ -393,7 +394,7 @@ stations.hydro_service_ES_ROAN <- function(x, ...) {
     start_year <- as.integer(format(rng$start_date, "%Y"))
     end_year   <- as.integer(format(rng$end_date,   "%Y"))
   } else {
-    # "complete" – ask for a wide range; ROAN only returns available years.
+    # "complete" - ask for a wide range; ROAN only returns available years.
     start_year <- 1911L
     end_year   <- as.integer(format(Sys.Date(), "%Y"))
   }
@@ -514,7 +515,7 @@ timeseries.hydro_service_ES_ROAN <- function(x,
     return(res)
   }
 
-  # Order by station_id, then timestamp (historical → today)
+  # Order by station_id, then timestamp (historical to today)
   res <- dplyr::arrange(res, station_id, timestamp)
 
   res

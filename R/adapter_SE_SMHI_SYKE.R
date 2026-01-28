@@ -3,10 +3,10 @@
 # Optional GeoJSON for coordinates: none (coords are provided as lon/lat WGS84)
 
 register_SE_SMHI <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "SE_SMHI",
     provider_name = "Swedish Meteorological and Hydrological Institute (SMHI)",
-    country       = "SE",
+    country       = "Sweden",
     base_url      = "https://opendata-download-hydroobs.smhi.se",   # TODO: confirm base
     rate_cfg      = list(n = 3, period = 1),
     auth          = list(type = "none")
@@ -27,7 +27,7 @@ timeseries_parameters.hydro_service_SE_SMHI <- function(x, ...) {
          water_level = list(ts_path = "/api/version/latest/parameter/3/station/",
                                 unit = "cm"),
          water_temperature = list(ts_path = "/api/version/latest/parameter/4/station/",
-                                unit = "°C"),
+                                unit = "\u00B0C"),
          rlang::abort("FI_SYKE supports 'water_discharge', 'water_level', 'water_temperature'.")
 
   )
@@ -65,7 +65,7 @@ stations.hydro_service_SE_SMHI <- function(x, ..., include_params = c(1L, 3L, 4L
             "SE_SMHI: Skipped ", sum(na_idx), " station(s) without entries in the column 'updated',
             to prevent errors while retrieving time series data. ",
             "Examples: ", paste(bad_ids, collapse = ", "),
-            if (sum(na_idx) > 5) paste0(" … (+", sum(na_idx) - 5, " more)") else ""
+            if (sum(na_idx) > 5) paste0(" ... (+", sum(na_idx) - 5, " more)") else ""
           ))
           df <- df[!na_idx, , drop = FALSE]
         }
@@ -174,7 +174,7 @@ timeseries.hydro_service_SE_SMHI <- function(x,
       msg <- paste0(
         "SE_SMHI: ", length(invalid), " station id(s) not available for parameter '", parameter, "'. ",
         "Examples: ", paste(utils::head(invalid, 5), collapse = ", "),
-        if (length(invalid) > 5) paste0(" … (+", length(invalid) - 5, " more)") else ""
+        if (length(invalid) > 5) paste0(" ... (+", length(invalid) - 5, " more)") else ""
       )
       rlang::warn(msg)
     }

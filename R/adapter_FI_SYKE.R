@@ -3,11 +3,13 @@
 
 # Constructor / registration ---------------------------------------------------
 
+#' @keywords internal
+#' @noRd
 register_FI_SYKE <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "FI_SYKE",
     provider_name = "Finnish Environment Institute (SYKE)",
-    country       = "FI",
+    country       = "Finland",
     base_url      = "http://rajapinnat.ymparisto.fi",   # TODO: confirm base
     rate_cfg      = list(n = 3, period = 1),
     auth          = list(type = "none")
@@ -28,8 +30,8 @@ timeseries_parameters.hydro_service_FI_SYKE <- function(x, ...) {
   switch(parameter,
          water_discharge            = list(path = "Virtaama",        unit = "m^3/s"),
          water_level                = list(path = "Vedenkorkeus",    unit = "cm"),     # raw cm (FI returns cm in Arvo)
-         water_temperature          = list(path = "LampoPintavesi",  unit = "°C"),     # surface
-         water_temperature_profile  = list(path = "LampoLuotaus",   unit = "°C",
+         water_temperature          = list(path = "LampoPintavesi",  unit = "\u00B0C"),     # surface
+         water_temperature_profile  = list(path = "LampoLuotaus",   unit = "\u00B0C",
                                            depth_field = "Syvyys", depth_unit = "cm"),  # profile depth
          runoff                     = list(path = "Valuma",          unit = "l/s/km2"),
          rlang::abort("FI_SYKE supports 'water_discharge', 'water_level', 'water_temperature', 'water_temperature_profile', or 'runoff'.")
@@ -189,7 +191,7 @@ stations.hydro_service_FI_SYKE <- function(x, ...) {
       # de-dup in case multiple rows per Paikka_Id
       out <- dplyr::distinct(out, station_id, .keep_all = TRUE)
 
-      meta <- get0("fi_syke_runoff_meta", inherits = TRUE)
+      meta <- .pkg_data("fi_syke_runoff_meta")
       if (!is.null(meta) && is.data.frame(meta) && nrow(meta)) {
         meta2 <- dplyr::select(meta, place_id,
                                area_meta = area,

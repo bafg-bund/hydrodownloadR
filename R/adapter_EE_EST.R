@@ -8,11 +8,13 @@
 
 # -- Registration -------------------------------------------------------------
 
+#' @keywords internal
+#' @noRd
 register_EE_EST <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "EE_EST",
-    provider_name = "Estonian Environment Agency – ESTMODEL API",
-    country       = "EE",
+    provider_name = "Estonian Environment Agency - ESTMODEL API",
+    country       = "Estonia",
     base_url      = "http://estmodel.envir.ee",     # API (time series & JSON metadata)
     geo_base_url  = "https://estmodel.app",         # coordinates (GeoJSON)
     rate_cfg      = list(n = 3, period = 1),
@@ -34,7 +36,7 @@ timeseries_parameters.hydro_service_EE_EST <- function(x, ...) {
   switch(parameter,
          water_discharge   = list(code = "Q", unit = "m^3/s"),
          water_level       = list(code = "H", unit = "m"),      # meters
-         water_temperature = list(code = "T", unit = "°C"),
+         water_temperature = list(code = "T", unit = "\u00B0C"),
          water_velocity    = list(code = "V", unit = "m/s"),
          rlang::abort("EE_EST supports 'water_discharge', 'water_level', 'water_temperature', or 'water_velocity'.")
   )
@@ -172,7 +174,7 @@ stations.hydro_service_EE_EST <- function(x, ...) {
 # Back-compat: JSON-only stations (used if GeoJSON fully fails)
 .ee_est_stations_json <- function(x) {
   meta_tbl <- .ee_est_stations_json_raw(x)
-  # Build output in the same shape (no coords if API doesn’t have them)
+  # Build output in the same shape (no coords if API does not have them)
   has_colon <- !is.na(meta_tbl$name0_j) & grepl(":", meta_tbl$name0_j, fixed = TRUE)
   river_from_name   <- ifelse(has_colon, trimws(sub("^([^:]+):.*$", "\\1", meta_tbl$name0_j)), NA_character_)
   station_from_name <- ifelse(has_colon, trimws(sub("^[^:]+:\\s*(.*)$", "\\1", meta_tbl$name0_j)), meta_tbl$name0_j)

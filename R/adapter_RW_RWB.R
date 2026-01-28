@@ -24,12 +24,13 @@
 # Registration
 # -----------------------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_RW_RWB <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "RW_RWB",
-    provider_name = "Rwanda – Rwanda Water Resources Board (Water Portal)",
-    country       = "RW",
+    provider_name = "Rwanda Water Resources Board (Water Portal)",
+    country       = "Rwanda",
     base_url      = "https://waterportal.rwb.rw",
     rate_cfg      = list(n = 1, period = 1),  # be polite: 1 request / second
     auth          = list(type = "none")
@@ -78,14 +79,14 @@ timeseries_parameters.hydro_service_RW_RWB <- function(x, ...) {
 
     water_temperature = list(
       field_params = c("Water Temp", "Water temperature", "Temperature"),
-      unit         = c("degC", "°C")
+      unit         = "\u00B0C"
     ),
 
     # new ones ---------------------------------------------------------------
     electrical_conductivity = list(
       # 2  Cond                uS/cm
       field_params = c("Cond", "Conductivity", "Cond.", "Electric Cond"),
-      unit         = c("uS/cm", "µS/cm", "us/cm")
+      unit         = c("\u00B5S/cm", "us/cm")
     ),
 
     salinity = list(
@@ -266,7 +267,7 @@ stations.hydro_service_RW_RWB <- function(x, ...) {
     }
     rlang::warn(paste0(
       "RW_RWB: HTTP ", status, " for station ", station_id,
-      " – skipping."
+      " - skipping."
     ))
     return(tibble::tibble())
   }

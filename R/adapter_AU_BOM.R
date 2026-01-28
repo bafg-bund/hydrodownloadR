@@ -1,11 +1,12 @@
 # ---- Registration ------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_AU_BOM <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "AU_BOM",
-    provider_name = "Australia – Bureau of Meteorology",
-    country       = "AU",
+    provider_name = "Bureau of Meteorology",
+    country       = "Australia",
     base_url      = "http://www.bom.gov.au/waterdata/services",
     rate_cfg      = list(n = 3, period = 1),
     auth          = list(type = "none")
@@ -25,7 +26,7 @@ timeseries_parameters.hydro_service_AU_BOM <- function(x, ...) {
   switch(parameter,
          water_discharge   = list(par = "Q",  unit = "m^3/s"),
          water_level       = list(par = "H",  unit = "m"),
-         water_temperature = list(par = "TW", unit = "°C"),
+         water_temperature = list(par = "TW", unit = "\u00B0C"),
          rlang::abort("AU_BOM supports 'water_discharge', 'water_level', 'water_temperature'.")
   )
 }

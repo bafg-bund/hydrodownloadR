@@ -2,29 +2,25 @@ Package: hydrodownloadR
 Title: Hydrological Station Catalogs and Time Series from Public APIs
 Version: 0.1.0
 Authors@R: c(
-     person("Henning", "Plessow", role = c("aut", "cre"),
-            email = "h.plessow@googlemail.com"),
-     person("Global Runoff Data Centre", role = "ctb",
-            email = "grdc@bafg.de")
- )
-Description: Provides a unified, extensible interface for discovering hydrological
-    stations and downloading daily or monthly time series of water discharge, water
-    level, water temperature and flow velocity from national and regional public APIs.
-    Implements a provider registry with identifiers and S3 generics 'stations' and
-    'timeseries'; supports date ranges or complete histories (from 1900-01-01),
-    per-station selection, rate limiting and retries, optional authentication via
-    environment variables, and tidy outputs. Includes UTF-8 to ASCII transliteration
-    and coordinate transformation to WGS84. Designed for reproducible workflows and
-    straightforward addition of new providers.
+    person("Henning", "Plessow", , "h.plessow@googlemail.com", role = c("aut", "cre")),
+    person("Global Runoff Data Centre", , , "grdc@bafg.de", role = "ctb")
+  )
+Description: Provides a unified, extensible interface to discover
+    hydrological stations and download daily time series (e.g., water
+    discharge, water level, water temperature, and several other water
+    quality parameter) from national and regional public APIs. Includes a
+    provider registry, S3 generics 'stations' and 'timeseries', licensing
+    metadata, date-range and “complete history” modes, rate limiting and
+    retries, optional authentication via environment variables, tidy
+    outputs, UTF-8 to ASCII transliteration, and WGS84 coordinates.
+    Designed for reproducible workflows and straightforward addition of
+    new providers.
 License: MIT + file LICENSE
 URL: https://github.com/bafg-bund/hydrodownloadR
 BugReports: https://github.com/bafg-bund/hydrodownloadR/issues
-Encoding: UTF-8
-Language: en-US
 Depends:
     R (>= 3.6)
 Imports:
-    cachem,
     cli,
     data.table,
     dataRetrieval,
@@ -34,7 +30,6 @@ Imports:
     httr2,
     jsonlite,
     lubridate,
-    memoise,
     pdftools,
     progress,
     rappdirs,
@@ -42,11 +37,17 @@ Imports:
     rlang,
     RSQLite,
     sf,
-    tibble,
-    writexl
+    tibble
 Suggests:
-    testthat (>= 3.0.0)
+    cachem,
+    curl,
+    memoise,
+    testthat (>= 3.0.0),
+    writexl
 Config/testthat/edition: 3
-SystemRequirements: GDAL, GEOS, PROJ
+Encoding: UTF-8
+Language: en-US
+LazyData: true
+LazyDataCompression: xz
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1

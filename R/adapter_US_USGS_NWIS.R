@@ -1,5 +1,5 @@
 # R/adapter_US_USGS_NWIS.R
-# United States – USGS NWIS adapter (via dataRetrieval)
+# United States - USGS NWIS adapter (via dataRetrieval)
 # Docs: https://doi-usgs.github.io/dataRetrieval/
 #
 # Auth (recommended): set a PAT for modern USGS APIs
@@ -19,12 +19,13 @@
 # ------------------------------------------------------------------------------
 # Registration
 # ------------------------------------------------------------------------------
-#' @export
+#' @keywords internal
+#' @noRd
 register_US_USGS_NWIS <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "US_USGS_NWIS",
-    provider_name = "United States – USGS NWIS (dataRetrieval)",
-    country       = "US",
+    provider_name = "USGS NWIS",
+    country       = "United States",
     base_url      = "https://waterservices.usgs.gov/nwis/",
     rate_cfg      = list(n = 10, period = 1),
     auth          = list(type = "header", header = "X-Api-Key")
@@ -180,7 +181,7 @@ timeseries_parameters.hydro_service_US_USGS_NWIS <- function(x, ...) {
 }
 
 
-# All states: no county fallback. If a state fails/returns 0 → wait 300s and queue it for a later pass.
+# All states: no county fallback. If a state fails/returns 0, wait 300s and queue it for a later pass.
 # We run multiple passes with a long cooldown between passes to let the rate limit reset,
 # and we SAVE PARTIAL RESULTS after each successful state.
 .usgs_fetch_sites_by_state <- function(limit_per_page = 10000,
@@ -404,7 +405,7 @@ stations.hydro_service_US_USGS_NWIS <- function(x, stations = NULL, update = FAL
   out <- tibble::tibble(
     country       = "US",
     provider_id   = "US_USGS_NWIS",
-    provider_name = "United States – USGS NWIS (dataRetrieval)",
+    provider_name = "United States - USGS NWIS (dataRetrieval)",
     station_id    = as.character(st$station_id),
     station_name  = as.character(st$station_name),
     lat           = suppressWarnings(as.numeric(st$lat)),
@@ -450,14 +451,57 @@ stations.hydro_service_US_USGS_NWIS <- function(x, stations = NULL, update = FAL
   ifelse(grepl("^USGS-", ids), ids, paste0("USGS-", ids))
 }
 
+# ---- helpers for robust legacy NWIS extraction --------------------------------
+.usgs_vec_coalesce <- function(lst, na_value = NA_real_) {
+  if (!length(lst)) return(na_value)
+  out <- lst[[1]]
+  if (length(lst) > 1) for (j in 2:length(lst)) out <- ifelse(!is.na(out), out, lst[[j]])
+  out
+}
+
+.usgs_extract_dv_legacy <- function(dv, pm) {
+  nms <- names(dv)
+
+  # Candidate value columns for discharge vs gage height
+  if (pm$nwis_pcode == "00060") {
+    val_cols <- grep("Flow$", nms, value = TRUE, ignore.case = TRUE)
+  } else { # 00065
+    # handle variants like "Gage height", "Gage.height", "..._Gage.height"
+    val_cols <- grep("Gage[ .]?height$", nms, value = TRUE, ignore.case = TRUE)
+  }
+  # Exclude qualifiers
+  val_cols <- setdiff(val_cols, grep("(_cd$|Qual)", val_cols, value = TRUE, ignore.case = TRUE))
+
+  # Fallback to raw code name (e.g. X_00060_00003) if nothing matched
+  if (!length(val_cols)) {
+    fallback_pat <- paste0("^X_", pm$nwis_pcode, "_00003$")
+    val_cols <- grep(fallback_pat, nms, value = TRUE)
+  }
+
+  # Build numeric vectors for each value col & coalesce rowwise
+  val_list <- lapply(val_cols, function(nm) suppressWarnings(as.numeric(dv[[nm]])))
+  values   <- .usgs_vec_coalesce(val_list, na_value = rep(NA_real_, nrow(dv)))
+
+  # Qualifier columns: prefer *_cd that correspond to value cols; also accept "...Qual"
+  qf_cols <- unique(c(
+    intersect(paste0(val_cols, "_cd"), nms),
+    grep("Qual", nms, value = TRUE, ignore.case = TRUE)
+  ))
+  qf_list <- lapply(qf_cols, function(nm) as.character(dv[[nm]]))
+  qf      <- .usgs_vec_coalesce(qf_list, na_value = rep(NA_character_, nrow(dv)))
+
+  list(values = values, qf = qf, used_value_cols = val_cols, used_qf_cols = qf_cols)
+}
+
+
 # --- timeseries (prefer new OGC API; fallback to legacy NWIS dv) ---------------
 #' @export
 timeseries.hydro_service_US_USGS_NWIS <- function(x,
                                              parameter = c("water_discharge","water_level"),
                                              stations = NULL,
-                                             mode = c("complete","range"),
                                              start_date = NULL,
                                              end_date = NULL,
+                                             mode = c("complete","range"),
                                              ...) {
   if (!requireNamespace("dataRetrieval", quietly = TRUE)) {
     rlang::abort("US_USGS requires the 'dataRetrieval' package. Install with install.packages('dataRetrieval').")
@@ -521,42 +565,14 @@ timeseries.hydro_service_US_USGS_NWIS <- function(x,
   }
 
   dv <- dataRetrieval::renameNWISColumns(dv_raw)
+  ext <- .usgs_extract_dv_legacy(dv, pm)
 
-  # Robustly pick the value + qualifier columns post-rename
-  value_col <- if (pm$nwis_pcode == "00060") {
-    if ("Flow" %in% names(dv)) "Flow" else {
-      cand <- grep("^Flow", names(dv), value = TRUE)
-      cand[1]
-    }
-  } else {
-    if ("Gage height" %in% names(dv)) "Gage height" else {
-      cand <- grep("^Gage height", names(dv), value = TRUE)
-      cand[1]
-    }
+  if (!length(ext$values) || length(ext$values) != nrow(dv)) {
+    rlang::abort("US_USGS (NWIS): could not derive a value vector from DV columns.")
   }
 
-  qual_col <- {
-    # Often e.g. "Flow_cd" or "Gage height_cd"; sometimes "Qualifiers"
-    qs <- grep("_cd$|_cd\\b|Qual", names(dv), value = TRUE)
-    # Prefer something that starts with the value column name
-    if (!is.null(value_col) && nzchar(value_col)) {
-      pref <- qs[startsWith(qs, value_col)]
-      if (length(pref)) pref[1] else qs[1]
-    } else {
-      qs[1]
-    }
-  }
-
-  if (is.null(value_col) || !nzchar(value_col)) {
-    rlang::abort("US_USGS: could not locate the value column in NWIS DV response.")
-  }
-
-  vals <- pm$to_canon(dv[[value_col]])
-  qf   <- if (!is.null(qual_col) && nzchar(qual_col) && qual_col %in% names(dv)) {
-    as.character(dv[[qual_col]])
-  } else {
-    NA_character_
-  }
+  vals <- pm$to_canon(ext$values)
+  qf   <- ext$qf
 
   out <- tibble::tibble(
     country       = x$country,

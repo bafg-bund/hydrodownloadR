@@ -2,16 +2,16 @@
 # Stations:
 #   - Official DGA station list (Excel) linked from:
 #       https://dga.mop.gob.cl/estadisticas-estaciones-dga/
-#     "Listado de estaciones activas de la Dirección General de Aguas"
-#     Columns (per site description): código, nombre, tipo de estación, cuenca,
+#     "Listado de estaciones activas de la Direcci\u00F3n General de Aguas"
+#     Columns (per site description): c\u00F3digo, nombre, tipo de estaci\u00F3n, cuenca,
 #     coordenadas.  We auto-detect columns by name and coerce the code column
 #     to text to preserve leading zeros.
 #
 # Time series:
-#   - Daily mean discharge compiled by CR2 (Caudales Medios Diarios – CR2),
-#     exposed via Explorador Climático:
+#   - Daily mean discharge compiled by CR2 (Caudales Medios Diarios - CR2),
+#     exposed via Explorador Clim\u00E1tico:
 #       https://explorador.cr2.cl
-#     We use the same “request.php?options=…” pattern as the existing
+#     We use the same "request.php?options=..." pattern as the existing
 #     `chile()` helper you showed, for `variable.id = "qflxDaily"`.
 #   - We always download the full series for a gauge and then filter by
 #     date range in R (like your `chile()` function).
@@ -26,12 +26,13 @@
 # Registration
 # -----------------------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_CL_DGA <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "CL_DGA",
-    provider_name = "Chile – Dirección General de Aguas (via CR2 Explorador)",
-    country       = "CL",
+    provider_name = "Direcci\u00F3n General de Aguas (via CR2 Explorador)",
+    country       = "Chile",
     base_url      = "https://explorador.cr2.cl",
     rate_cfg      = list(n = 1L, period = 1),  # 1 request / second
     auth          = list(type = "none")
@@ -53,7 +54,7 @@ timeseries_parameters.hydro_service_CL_DGA <- function(x, ...) {
 }
 
 .cl_dga_stationlist_url <- function() {
-  # Scrape the Estadísticas page to find the current .xlsx with the
+  # Scrape the Estadisticas page to find the current .xlsx with the
   # "Listado de estaciones vigentes / activas".
   page_url <- .cl_dga_stationlist_page()
 
@@ -64,7 +65,7 @@ timeseries_parameters.hydro_service_CL_DGA <- function(x, ...) {
 
   resp <- try(perform_request(req), silent = TRUE)
   if (inherits(resp, "try-error")) {
-    rlang::abort("CL_DGA: failed to fetch Estadísticas page for station list.")
+    rlang::abort("CL_DGA: failed to fetch Estadisticas page for station list.")
   }
 
   html <- try(
@@ -72,7 +73,7 @@ timeseries_parameters.hydro_service_CL_DGA <- function(x, ...) {
     silent = TRUE
   )
   if (inherits(html, "try-error")) {
-    rlang::abort("CL_DGA: could not parse Estadísticas HTML for station list.")
+    rlang::abort("CL_DGA: could not parse Estadisticas HTML for station list.")
   }
 
   links <- rvest::html_elements(html, "a")
@@ -81,18 +82,24 @@ timeseries_parameters.hydro_service_CL_DGA <- function(x, ...) {
 
   # Heuristic: the station list is an .xlsx whose path typically contains
   # "Listado-estaciones" and/or "Nacional".
-  cand <- hrefs[grepl("\\.xlsx$", hrefs, ignore.case = TRUE)]
-  cand <- cand[
-    grepl("Listado", cand, ignore.case = TRUE) |
-      grepl("estaciones", cand, ignore.case = TRUE)
-  ]
+  xlsx <- hrefs[grepl("\\.xlsx($|\\?)", hrefs, ignore.case = TRUE)]
 
-  if (!length(cand)) {
+  if (!length(xlsx)) {
     rlang::abort(
-      "CL_DGA: could not find station list .xlsx on Estadísticas page."
+      "CL_DGA: could not find any .xlsx link on Estadisticas page."
     )
   }
 
+
+  preferred <- xlsx[
+    grepl("Listado",     xlsx, ignore.case = TRUE) |
+      grepl("Estacion",  xlsx, ignore.case = TRUE) |
+      grepl("Estaciones",xlsx, ignore.case = TRUE) |
+      grepl("Nacional",  xlsx, ignore.case = TRUE) |
+      grepl("Informe",   xlsx, ignore.case = TRUE)
+  ]
+
+  cand <- if (length(preferred)) preferred else xlsx
   url <- cand[1]
   if (!grepl("^https?://", url)) {
     url <- xml2::url_absolute(url, page_url)
@@ -118,13 +125,13 @@ timeseries_parameters.hydro_service_CL_DGA <- function(x, ...) {
   bin <- httr2::resp_body_raw(resp)
   writeBin(bin, tmp)
 
-  # First pass: detect which column is the station code (e.g. "Estación")
+  # First pass: detect which column is the station code (e.g. "Estaci\u00F3n")
   raw0 <- readxl::read_xlsx(tmp, sheet = 1, skip = 15)
   nm0  <- names(raw0)
 
   id_idx <- which(
     grepl("estaci", nm0, ignore.case = TRUE) |
-      grepl("c[oó]digo", nm0, ignore.case = TRUE)
+      grepl("c[o\u00F3]digo", nm0, ignore.case = TRUE)
   )[1]
 
   if (is.na(id_idx)) {
@@ -184,7 +191,6 @@ timeseries_parameters.hydro_service_CL_DGA <- function(x, ...) {
   list(lon = lon, lat = lat)
 }
 
-# Parse strings like "17°35'42''" (optionally with S/W/O suffix) into decimal degrees.
 .cl_dga_dms_to_dd <- function(x, is_lon = FALSE) {
   if (is.null(x)) return(NA_real_)
 
@@ -226,25 +232,25 @@ timeseries_parameters.hydro_service_CL_DGA <- function(x, ...) {
 }
 
 .cl_dga_split_station_name <- function(estacion_col) {
-  # estacion_col: vector from "Estación" column
+  # estacion_col: vector from "Estaci\u00F3n" column
   original <- normalize_utf8(trimws(as.character(estacion_col)))
   river    <- rep(NA_character_, length(original))
   location <- original
 
   # Match things like "RIO CAMARONES EN CONANOXA"
-  has_pat <- grepl("R[ÍI]O\\s+.+\\s+EN\\s+.+",
+  has_pat <- grepl("R[\u00cdI]O\\s+.+\\s+EN\\s+.+",
                    original,
                    ignore.case = TRUE)
 
   river[has_pat] <- sub(
-    "^(R[ÍI]O\\s+.+?)\\s+EN\\s+(.+)$",
+    "^(R[\u00cdI]O\\s+.+?)\\s+EN\\s+(.+)$",
     "\\1",
     original[has_pat],
     ignore.case = TRUE
   )
 
   location[has_pat] <- sub(
-    "^(R[ÍI]O\\s+.+?)\\s+EN\\s+(.+)$",
+    "^(R[\u00cdI]O\\s+.+?)\\s+EN\\s+(.+)$",
     "\\2",
     original[has_pat],
     ignore.case = TRUE
@@ -266,8 +272,8 @@ stations.hydro_service_CL_DGA <- function(x, ...) {
     rlang::abort("CL_DGA: station list .xlsx appears to be empty.")
   }
 
-  # --- filter by Tipo de Estación -------------------------------------------
-  tipo_col <- col_or_null(raw_tbl, "Tipo de Estación")
+  # --- filter by Tipo de Estaci\u00F3n -------------------------------------------
+  tipo_col <- col_or_null(raw_tbl, "Tipo de Estaci\u00F3n")
   station_type <- NULL
 
   if (!is.null(tipo_col)) {
@@ -308,12 +314,12 @@ stations.hydro_service_CL_DGA <- function(x, ...) {
   # --- columns via col_or_null() ---------------------------------------------
 
   # Station code (ID)
-  station_id_col <- col_or_null(raw_tbl, "Código")
+  station_id_col <- col_or_null(raw_tbl, "C\u00F3digo")
 
   # Station name (full DGA label, e.g. "RIO CAMARONES EN CONANOXA")
-  estacion_col <- col_or_null(raw_tbl, "Estación")
+  estacion_col <- col_or_null(raw_tbl, "Estaci\u00F3n")
 
-  # Coordinates (UTM + Datum)
+  # Coordinates (UTM and Datum)
   utm_n_col <- col_or_null(raw_tbl, "UTM WGS84 Norte(m)")
   utm_e_col <- col_or_null(raw_tbl, "UTM WGS84 Este(m)")
   datum_col <- col_or_null(raw_tbl, "Datum")
@@ -342,7 +348,7 @@ stations.hydro_service_CL_DGA <- function(x, ...) {
   lon_dms <- lon_dms_col
   alt_raw <- alt_col
 
-  # --- 1) primary: UTM → WGS84 ----------------------------------------------
+  # --- 1) primary: UTM to WGS84 ----------------------------------------------
 
   utm_coords <- .cl_dga_utm_to_wgs84(
     east  = utm_e,

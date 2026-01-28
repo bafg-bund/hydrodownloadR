@@ -1,16 +1,18 @@
 #' LT_LHMT adapter (Lithuanian Hydrometeorological Service) -------------------
 #' Base: https://api.meteo.lt/v1/
 #' Hydro: /hydro-stations, /hydro-stations/{code}/observations/{measured|historical}/{date|latest}
-#' Docs show: measured -> waterLevel (cm), waterTemperature (°C), hourly timestamps (last 30d)
+#' Docs show: measured -> waterLevel (cm), waterTemperature (C), hourly timestamps (last 30d)
 #'            historical -> waterLevel (cm, daily mean), waterDischarge (m3/s, daily mean), since 2000
 #' Rate guidance in API page (IP-based) >> we'll still use list(n = 3, period = 1) as requested.
 # Provider registration --------------------------------------------------------
 
+#' @keywords internal
+#' @noRd
 register_LT_LHMT <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "LT_LHMT",
     provider_name = "Lithuanian Hydrometeorological Service (LHMT)",
-    country       = "LT",
+    country       = "Lithuania",
     base_url      = "https://api.meteo.lt/v1/",     # API (time series & JSON metadata)
     rate_cfg      = list(n = 3, period = 1),
     auth          = list(type = "none")

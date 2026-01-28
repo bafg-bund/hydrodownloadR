@@ -16,7 +16,7 @@ A tibble with:
 Finnish Environment Institute (SYKE).
 }
 \usage{
-fi_syke_runoff_meta
+data(fi_syke_runoff_meta)
 }
 \description{
 Catchment area and altitude for Finnish SYKE runoff stations.

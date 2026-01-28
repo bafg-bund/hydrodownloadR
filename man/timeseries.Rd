@@ -35,3 +35,16 @@ timestamp, value, unit, quality_code, source_url.
 \description{
 Retrieve time series for a provider
 }
+\examples{
+# Offline: construct a service object (no network)
+x <- hydro_service("SE_SMHI")
+
+\dontshow{if (interactive() && requireNamespace("curl", quietly = TRUE) && curl::has_internet() && identical(Sys.getenv("HYDRO_EXAMPLES"), "true")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+# Online (opt-in): one station for a short range
+st <- head(stations(x)$station_id, 1)
+ts <- timeseries(x, parameter = "water_discharge",
+                 stations = st,
+                 start_date = "2020-01-01", end_date = "2020-01-10")
+head(ts)
+\dontshow{\}) # examplesIf}
+}

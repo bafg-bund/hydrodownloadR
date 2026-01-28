@@ -1,15 +1,17 @@
-# UK – Centre For Ecology & Hydrology (EA Hydrology API) adapter
+# UK - Centre For Ecology & Hydrology (EA Hydrology API) adapter
 # Provider: UK_CEH
 # Base URL: http://environment.data.gov.uk/hydrology
 # Docs: https://environment.data.gov.uk/hydrology/doc/reference
 
 # ---- registration -----------------------------------------------------------
 
+#' @keywords internal
+#' @noRd
 register_UK_CEH <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "UK_CEH",
-    provider_name = "UK – Centre For Ecology & Hydrology API",
-    country       = "UK",
+    provider_name = "Centre For Ecology & Hydrology API",
+    country       = "United Kingdom",
     base_url      = "http://environment.data.gov.uk/hydrology",
     rate_cfg      = list(n = 3, period = 1),
     auth          = list(type = "none")
@@ -37,7 +39,7 @@ timeseries_parameters.hydro_service_UK_CEH <- function(x, ...) {
     turbidity       = list(observedProp = "turbidity",     unit = "NTU"),
     chlorophyll     = list(observedProp = "chlorophyll",   unit = "\u00B5g/L"),
     conductivity    = list(observedProp = "conductivity",  unit = "\u00B5S/cm"),
-    temperature     = list(observedProp = "water_temperature",   unit = "°C"),
+    temperature     = list(observedProp = "water_temperature",   unit = "\u00B0C"),
     ammonium        = list(observedProp = "ammonium",      unit = "mg/L"),
     nitrate         = list(observedProp = "nitrate",       unit = "mg/L (as N)"),
     ph              = list(observedProp = "ph",            unit = NA_character_),
@@ -328,7 +330,7 @@ timeseries.hydro_service_UK_CEH <- function(x,
     meas_df$notation  <- as.character(meas_df$notation %||% NA_character_)
     meas_df$unitName  <- as.character(meas_df$unitName %||% NA_character_)
 
-    # selection: discharge → daily mean; others → 15-min instantaneous
+    # selection: discharge to daily mean; others 15-min instantaneous
     if (parameter == "water_discharge") {
       sel <- meas_df[
         !is.na(meas_df$valueType) & meas_df$valueType == "mean" &

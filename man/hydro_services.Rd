@@ -7,7 +7,9 @@
 hydro_services()
 }
 \value{
-A tibble with columns: provider_id, provider_name, country, base_url
+A tibble with columns:
+provider_id, provider_name, country, base_url,
+license, license_link, access_class, reuse_class, is_open_data
 }
 \description{
 List available providers

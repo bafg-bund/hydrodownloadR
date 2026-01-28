@@ -12,4 +12,8 @@
 #'   \item{altitude}{Numeric (m). May be NA.}
 #' }
 #' @source Finnish Environment Institute (SYKE).
-"fi_syke_runoff_meta"
+#' @keywords datasets
+#' @name fi_syke_runoff_meta
+#' @docType data
+#' @usage data(fi_syke_runoff_meta)
+NULL

@@ -17,3 +17,15 @@ A tibble with station metadata.
 \description{
 List stations for a provider
 }
+\examples{
+# Offline: enumerate providers (no network)
+s <- hydro_services()
+head(names(s))
+
+\dontshow{if (interactive() && requireNamespace("curl", quietly = TRUE) && curl::has_internet() && identical(Sys.getenv("HYDRO_EXAMPLES"), "true")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+# Online (opt-in): fetch stations
+x <- hydro_service("SE_SMHI")
+st <- stations(x)
+head(st)
+\dontshow{\}) # examplesIf}
+}

@@ -1,5 +1,5 @@
 # R/adapter_US_USGS_DR.R
-# United States – USGS NWIS adapter (via dataRetrieval)
+# United States - USGS NWIS adapter (via dataRetrieval)
 # Docs: https://doi-usgs.github.io/dataRetrieval/
 #
 # Auth (recommended): set a PAT for modern USGS APIs
@@ -19,12 +19,13 @@
 # ------------------------------------------------------------------------------
 # Registration
 # ------------------------------------------------------------------------------
-#' @export
+#' @keywords internal
+#' @noRd
 register_US_USGS_DR <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "US_USGS_DR",
-    provider_name = "United States – USGS dataRetrieval",
-    country       = "US",
+    provider_name = "USGS dataRetrieval",
+    country       = "United States",
     base_url      = "https://waterservices.usgs.gov/nwis/",
     rate_cfg      = list(n = 10, period = 1),
     auth          = list(type = "header", header = "X-Api-Key")
@@ -180,7 +181,7 @@ timeseries_parameters.hydro_service_US_USGS_DR <- function(x, ...) {
 }
 
 
-# All states: no county fallback. If a state fails/returns 0 → wait 300s and queue it for a later pass.
+# All states: no county fallback. If a state fails/returns 0, wait 300s and queue it for a later pass.
 # We run multiple passes with a long cooldown between passes to let the rate limit reset,
 # and we SAVE PARTIAL RESULTS after each successful state.
 .usgs_fetch_sites_by_state <- function(limit_per_page = 10000,
@@ -404,7 +405,7 @@ stations.hydro_service_US_USGS_DR <- function(x, stations = NULL, update = FALSE
   out <- tibble::tibble(
     country       = "US",
     provider_id   = "US_USGS_DR",
-    provider_name = "United States – USGS NWIS (dataRetrieval)",
+    provider_name = "United States - USGS NWIS (dataRetrieval)",
     station_id    = as.character(st$station_id),
     station_name  = as.character(st$station_name),
     lat           = suppressWarnings(as.numeric(st$lat)),
@@ -455,9 +456,9 @@ stations.hydro_service_US_USGS_DR <- function(x, stations = NULL, update = FALSE
 timeseries.hydro_service_US_USGS_DR <- function(x,
                                              parameter = c("water_discharge","water_level"),
                                              stations = NULL,
-                                             mode = c("complete","range"),
                                              start_date = NULL,
                                              end_date = NULL,
+                                             mode = c("complete","range"),
                                              ...) {
   if (!requireNamespace("dataRetrieval", quietly = TRUE)) {
     rlang::abort("US_USGS requires the 'dataRetrieval' package. Install with install.packages('dataRetrieval').")

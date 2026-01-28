@@ -1,13 +1,15 @@
 # R/adapter_IE_OPW.R
-# Office of Public Works — waterlevel.ie
+# Office of Public Works - waterlevel.ie
 
 # -- Registration --------------------------------------------------------------
 
+#' @keywords internal
+#' @noRd
 register_IE_OPW <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "IE_OPW",
     provider_name = "Office of Public Works",
-    country       = "IE",
+    country       = "Ireland",
     base_url      = "https://waterlevel.ie",          # Hydro-Data JSON
     rate_cfg      = list(n = 3, period = 1),
     auth          = list(type = "none")
@@ -26,7 +28,7 @@ timeseries_parameters.hydro_service_IE_OPW <- function(x, ...) {
   switch(tolower(parameter),
          water_level        = list(code = "S",      unit = "m"),
          water_discharge    = list(code = "Q",      unit = "m^3/s"),
-         water_temperature  = list(code = "TWater", unit = "°C"),
+         water_temperature  = list(code = "TWater", unit = "\u00B0C"),
          rlang::abort("IE_OPW supports 'water_level', 'water_discharge', or 'water_temperature'.")
   )
 }
@@ -170,14 +172,14 @@ stations.hydro_service_IE_OPW <- function(x, ...) {
   river       <- ifelse(!is.na(river0) & nzchar(river0), river0,
                         ifelse(!is.na(river_fallback) & nzchar(river_fallback), river_fallback, NA_character_))
 
-  # Catchment area like "76.82 km²" -> numeric km²
+  # Catchment area like "76.82 km" -> numeric km
   area_txt    <- get_chr("CATCHMENT_SIZE")
   area_num    <- suppressWarnings(as.numeric(sub("\\s.*$", "", area_txt)))
 
   # Altitude (station_gauge_datum if present; may be blank) as numeric
   altitude_txt <- get_chr("station_gauge_datum")
   altitude_num <- suppressWarnings(as.numeric(altitude_txt))
-  # If you’d rather fall back to GAUGE_DATUM as an "elevation" proxy, uncomment:
+  # If you would rather fall back to GAUGE_DATUM as an "elevation" proxy, uncomment:
   # altitude_num <- ifelse(is.na(altitude_num), suppressWarnings(as.numeric(get_chr("GAUGE_DATUM"))), altitude_num)
 
   # org_id: zero-padded 5-digit from station_id
@@ -467,7 +469,7 @@ timeseries.hydro_service_IE_OPW <- function(x,
       "IE_OPW: ", length(nf), " station(s) returned 404/empty for parameter '", parameter,
       "'. Likely no series or discontinued. Skipped: ",
       paste(utils::head(nf, 10), collapse = ", "),
-      if (length(nf) > 10) paste0(" … +", length(nf) - 10, " more") else ""
+      if (length(nf) > 10) paste0(" ... +", length(nf) - 10, " more") else ""
     ))
   }
 

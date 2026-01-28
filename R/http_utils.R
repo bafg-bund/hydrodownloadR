@@ -34,7 +34,8 @@ perform_request <- function(req, max_tries = 5) {
 }
 
 #' Ensure HTTP status 200 (useful for auth pings)
-#' @export
+#' @keywords internal
+#' @noRd
 check_status_200 <- function(resp) {
   if (httr2::resp_status(resp) != 200) {
     rlang::abort(paste0("HTTP status is not 200: ", httr2::resp_status(resp)))

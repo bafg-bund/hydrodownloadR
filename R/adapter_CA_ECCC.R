@@ -1,7 +1,7 @@
 # R/adapter_CA_ECCC.R
-# Canada – Environment & Climate Change Canada (ECCC) Hydrometric adapter
-# Option A (default now): HYDAT (SQLite) – offline, cached
-# Option B (fallback): OGC API – Features (stations + time series)
+# Canada - Environment & Climate Change Canada (ECCC) Hydrometric adapter
+# Option A (default now): HYDAT (SQLite) - offline, cached
+# Option B (fallback): OGC API - Features (stations + time series)
 #
 # This update adds HYDAT database bootstrapping:
 # - Detect cached DB (user cache dir) or download the latest date-stamped zip
@@ -19,12 +19,13 @@
 # Registration
 # -----------------------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_CA_ECCC <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "CA_ECCC",
-    provider_name = "Canada – ECCC Hydrometric (HYDAT/OGC)",
-    country       = "CA",
+    provider_name = "ECCC Hydrometric (HYDAT/OGC)",
+    country       = "Canada",
     base_url      = "https://collaboration.cmc.ec.gc.ca/cmc/hydrometrics/www/Hydat_sqlite3_YYYYMMDD.zip",
     rate_cfg      = list(n = 10, period = 1),
     auth          = list(type = "none")
@@ -137,9 +138,9 @@ COLLECTION_DAILY_MEAN     <- "hydrometric-daily-mean"
   url <- .ca_find_latest_hydat_url()
   zip_path <- file.path(cache_dir, basename(url))
 
-  # download (inform user — large file, slow)
+  # download (inform user - large file, slow)
   cli::cli_inform(c(
-    "i" = "Downloading HYDAT SQLite archive — this can take ~10 minutes...",
+    "i" = "Downloading HYDAT SQLite archive - this can take ~10 minutes...",
     " " = url,
     " " = paste0("Destination: ", zip_path)
   ))
@@ -236,7 +237,7 @@ COLLECTION_DAILY_MEAN     <- "hydrometric-daily-mean"
     on.exit(try(DBI::dbDisconnect(con), silent = TRUE), add = TRUE)
   }
 
-  cli::cli_inform(c("i" = sprintf("CA_ECCC: reading '%s' from HYDAT (first use)…", table)))
+  cli::cli_inform(c("i" = sprintf("CA_ECCC: reading '%s' from HYDAT (first use)...", table)))
   df <- DBI::dbReadTable(con, table)
 
   saveRDS(df, rds)
@@ -342,9 +343,9 @@ stations.hydro_service_CA_ECCC <- function(x, stations = NULL, ...) {
 timeseries.hydro_service_CA_ECCC <- function(x,
                                              parameter = c("water_discharge","water_level"),
                                              stations = NULL,
-                                             mode = c("complete","range"),
                                              start_date = NULL,
                                              end_date   = NULL,
+                                             mode = c("complete","range"),
                                              station_cap = 100,
                                              ...) {
   pm   <- .ca_param_map(parameter)

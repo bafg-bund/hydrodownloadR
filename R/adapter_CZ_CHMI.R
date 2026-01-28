@@ -1,25 +1,21 @@
 # R/adapter_CZ_CHMI.R
-# Czech Republic – ČHMÚ Hydroportal (OpenData) adapter
+# Czech Republic - CMHU Hydroportal (OpenData) adapter
 # Historical daily data via:
 # - Metadata: https://opendata.chmi.cz/hydrology/historical/metadata/meta1.json
 # - Daily TS (per station/year): https://opendata.chmi.cz/hydrology/historical/data/daily/H_{id}_DQ_{year}.json
 #   (NOTE: file contains tsList for HD, QD, TD; we filter by tsConID)
 #
-# Parameters exposed:
-#   - water_level       (HD, unit CM  → "cm")
-#   - water_discharge   (QD, unit M3_S → "m3/s")
-#   - water_temperature (TD, unit 0C  → "°C")
-#
 # Dependencies: httr2, jsonlite, dplyr, tidyr, purrr, stringr, lubridate, readr, tibble, cli
 
 # ---- Registration ------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_CZ_CHMI <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "CZ_CHMI",
-    provider_name = "Czech Republic – Czech Hydrometeorological Institute",
-    country       = "CZ",
+    provider_name = "Czech Hydrometeorological Institute",
+    country       = "Czech Republic",
     base_url      = "https://opendata.chmi.cz",
     rate_cfg      = list(n = 3, period = 1),
     auth          = list(type = "none")
@@ -55,7 +51,7 @@ timeseries_parameters.hydro_service_CZ_CHMI <- function(x, ...) {
            canon    = "m^3/s"
          ),
          water_temperature = list(
-           unit     = "\u00B0C",              # display as °C
+           unit     = "\u00B0C",              # display as \u00B0C
            tsConID  = "TD",
            to_canon = function(v) v,          # already 0C
            canon    = "\u00B0C"
@@ -345,7 +341,7 @@ timeseries.hydro_service_CZ_CHMI <- function(x,
 
         if (!any(keep, na.rm = TRUE)) return(tibble::tibble())
 
-        # ts_id is the one we’re iterating (used in URL)
+        # ts_id is the one we are iterating (used in URL)
         ts_id <- st_id
         station_id_val <- id_map$station_id[match(ts_id, id_map$ts_id)]
 

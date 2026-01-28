@@ -1,11 +1,12 @@
 # ---- Registration ------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_NO_NVE <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "NO_NVE",
-    provider_name = "Norway – Norwegian Water Resources and Energy Directorate (NVE)",
-    country       = "NO",
+    provider_name = "Norwegian Water Resources and Energy Directorate (NVE)",
+    country       = "Norway",
     base_url      = "https://hydapi.nve.no",
     rate_cfg      = list(n = 3, period = 1),
     auth          = list(type = "api_key", header = "X-API-Key", env = "NVE_API_KEY")
@@ -26,8 +27,6 @@ timeseries_parameters.hydro_service_NO_NVE <- function(x, ...) {
 
 # ---- Parameter mapping (private) --------------------------------------------
 
-# ---- Parameter mapping (private) --------------------------------------------
-
 .no_param_map <- function(parameter) {
   switch(parameter,
 
@@ -37,7 +36,7 @@ timeseries_parameters.hydro_service_NO_NVE <- function(x, ...) {
            canon    = "cm",
            param_id = 1000L,                       # NVE: Stage (API unit is meters)
            to_canon = function(v, raw_unit = NULL) {
-             # Convert meters → cm when needed; pass-through otherwise
+             # Convert meters to cm when needed; pass-through otherwise
              ru <- tolower(raw_unit %||% "")
              if (ru %in% c("m","meter","metre")) v * 100 else v
            }
@@ -216,7 +215,7 @@ stations.hydro_service_NO_NVE <- function(x, stations = NULL, ...) {
   dplyr::distinct(out, .data$station_id, .keep_all = TRUE)
 }
 
-# ---- NVE code → description maps (private) ----------------------------------
+# ---- NVE code to description maps (private) ----------------------------------
 
 .nve_quality_map <- c(
   `0` = "Unknown",
@@ -240,13 +239,13 @@ stations.hydro_service_NO_NVE <- function(x, stations = NULL, ...) {
   `12` = "Incomplete data source",
   `13` = "Calculated from similar/nearby station (statistical adjustment)",
   `14` = "Statistically infilled missing value",
-  `15` = "Computation produced NaN/±Inf (outside valid range)",
+  `15` = "Computation produced NaN/Inf (outside valid range)",
   `16` = "Value fetched from rejected period"
 )
 
 .map_desc <- function(code, map) {
   if (is.null(code)) return(rep(NA_character_, 0))
-  # keep vectorized behavior; unknown codes → "Unknown code: <value>"
+  # keep vectorized behavior; unknown codes to "Unknown code: <value>"
   key <- as.character(code)
   out <- unname(map[key])
   out[is.na(out) & !is.na(key)] <- paste0("Unknown code: ", key[is.na(out) & !is.na(key)])

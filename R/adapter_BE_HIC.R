@@ -2,12 +2,13 @@
 
 # ---- Registration ------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_BE_HIC <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "BE_HIC",
-    provider_name = "Belgium – Hydrological Information Centre – HIC (Flanders)",
-    country       = "BE",
+    provider_name = "Hydrological Information Centre - HIC (Flanders)",
+    country       = "Belgium",
     base_url      = "https://hicws.vlaanderen.be/KiWIS/KiWIS",
     rate_cfg      = list(n = 1, period = 5),
     auth          = list(type = "none")
@@ -33,11 +34,11 @@ timeseries_parameters.hydro_service_BE_HIC <- function(x, ...) {
     water_level          = list(par = "H",       unit = "m",     group_id = "156162"),
 
     # High-resolution water quality (as provided)
-    chlorophyll          = list(par = "Chl",     unit = "µg/L",  group_id = "156172"),
-    conductivity         = list(par = "EC",      unit = "µS/cm", group_id = "156173"),
+    chlorophyll          = list(par = "Chl",     unit = "\u00B5g/L",  group_id = "156172"),
+    conductivity         = list(par = "EC",      unit = "\u00B5S/cm", group_id = "156173"),
     salinity             = list(par = "Salinity",unit = "PSU",   group_id = "421208"),
     turbidity            = list(par = "Turbidity",unit= "FNU",   group_id = "156202"),
-    water_temperature    = list(par = "TWater",  unit = "°C",    group_id = "156200"),
+    water_temperature    = list(par = "TWater",  unit = "\u00B0C",    group_id = "156200"),
     oxygen_concentration = list(par = "DO",      unit = "mg/L",  group_id = "156207"),
     oxygen_saturation    = list(par = "DO_sat",  unit = "%",     group_id = "156208"),
     ph                   = list(par = "pH",      unit = "",      group_id = "156197"),
@@ -54,7 +55,7 @@ timeseries_parameters.hydro_service_BE_HIC <- function(x, ...) {
 # NOTE:
 # - Pull all stations via KiWIS getStationList (JSON).
 # - Exclude any stations that only belong to virtual group 260592
-#   (“Calculated discharges at important locations waterways”).
+#   ("Calculated discharges at important locations waterways").
 #   We identify those by querying getTimeseriesList for that group and
 #   dropping any matching station_nos.
 
@@ -98,20 +99,6 @@ timeseries_parameters.hydro_service_BE_HIC <- function(x, ...) {
   tibble::as_tibble(js)
 }
 
-# Parse area like "1,00 km²" or "12.345,67 km²" -> numeric km²
-.be_parse_km2_numeric <- function(x) {
-  if (is.null(x)) return(NA_real_)
-  s <- as.character(x)
-  s <- trimws(s)
-  # strip trailing unit variants
-  s <- gsub("\\s*(km\\s*²|km\\^2|km2)\\s*$", "", s, ignore.case = TRUE)
-  # drop thousands separators, normalize decimal comma
-  s <- gsub("\\.", "", s)
-  s <- gsub(",", ".", s)
-  suppressWarnings(as.numeric(s))
-}
-
-
 #' @export
 stations.hydro_service_BE_HIC <- function(x, ...) {
   # Pull station core + custom attrs (ca_sta) including station_gauge_datum (+ Catchment)
@@ -151,10 +138,8 @@ stations.hydro_service_BE_HIC <- function(x, ...) {
   # custom-attribute fields (names differ across KiWIS setups; try several)
   vdatum_raw <- col_or_null(df, "station_gauge_datum_postfix")
 
-  # catchment size (km²) — only keep when not 1 km²
   catch_raw <- col_or_null(df, "CATCHMENT_SIZE")
-
-  area_km2 <- .be_parse_km2_numeric(catch_raw)
+  area_km2  <- parse_area_km2(catch_raw)
   area_km2[!is.na(area_km2) & abs(area_km2 - 1) < 1e-9] <- NA_real_
   alt  <- col_or_null(df, "ALTITUDE") %||% NA_real_
 
@@ -428,7 +413,7 @@ timeseries.hydro_service_BE_HIC <- function(x,
   )
   rl_vals <- ratelimitr::limit_rate(
     function(i) {
-      on.exit(Sys.sleep(5 + stats::runif(1, 0, 0.5)), add = TRUE)  # 5.0–5.5s
+      on.exit(Sys.sleep(5 + stats::runif(1, 0, 0.5)), add = TRUE)  # 5.0-5.5s
       fetch_vals(ts_ids[[i]])
     },
     rate = ratelimitr::rate(n = 1, period = 5)

@@ -1,25 +1,27 @@
-# ==== Netherlands (Rijkswaterstaat – DDL) adapter ============================
+# ==== Netherlands (Rijkswaterstaat - DDL) adapter ============================
 # Base docs: https://rijkswaterstaatdata.nl/waterdata/ (how-to + examples)
 # Endpoints:
 #   - Catalog:  /METADATASERVICES_DBO/OphalenCatalogus
 #   - Data:     /ONLINEWAARNEMINGENSERVICES_DBO/OphalenWaarnemingen
 #
 # Notes:
-# - Typical interval is 10-min; server caps responses at ~160,000 rows → we chunk by month.
+# - Typical interval is 10-min; server caps responses at ~160,000 rows we chunk by month.
 # - Coordinates come as X/Y with "Coordinatenstelsel" (often EPSG:25831 ETRS89/UTM31N), convert to 4326.
 # - AQUO codes used in practice:
 #     * Water level:       Grootheid.Code = "WATHTE" (unit cm, datum often NAP)
 #     * Discharge (debit): Grootheid.Code = "Q"      (unit m^3/s)   # adjust if RWS changes
-#     * Temperature:       Grootheid.Code = "T"      (unit °C)
+#     * Temperature:       Grootheid.Code = "T"      (unit C)
 # - Add optional header X-API-KEY if RWS introduces keys (beta mention).
 
 # -- Registration -------------------------------------------------------------
 
+#' @keywords internal
+#' @noRd
 register_NL_RWS <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "NL_RWS",
-    provider_name = "Netherlands – Rijkswaterstaat DDL",
-    country       = "NL",
+    provider_name = "Rijkswaterstaat DDL",
+    country       = "Netherlands",
     base_url      = "https://waterwebservices.rijkswaterstaat.nl",
     geo_base_url  = NULL,
     rate_cfg      = list(n = 3, period = 1),
@@ -203,7 +205,7 @@ stations.hydro_service_NL_RWS <- function(x, ...) {
 }
 
 .nl_quality_desc <- function(x) {
-  # Map common RWS status labels → concise English
+  # Map common RWS status labels to concise English
   dplyr::case_when(
     is.na(x) ~ NA_character_,
     x %in% c("Gecontroleerd", "Geverifieerd") ~ "validated",

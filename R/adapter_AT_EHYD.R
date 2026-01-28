@@ -1,5 +1,5 @@
 # R/adapter_AT_EHYD.R
-# Austria – eHYD (BMLRT) Hydrometric adapter (offline CSV bundle)
+# Austria - eHYD (BMLRT) Hydrometric adapter (offline CSV bundle)
 # Surface water bodies daily data:
 #   https://ehyd.gv.at/eHYD/AreaSelection/download?cat=owf&reg=10
 #
@@ -15,12 +15,13 @@
 # Registration
 # -----------------------------------------------------------------------------
 
-#' @export
+#' @keywords internal
+#' @noRd
 register_AT_EHYD <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "AT_EHYD",
-    provider_name = "Austria – eHYD (BMLRT) CSV Bundle",
-    country       = "AT",
+    provider_name = "eHYD (BMLRT) CSV Bundle",
+    country       = "Austria",
     base_url      = "https://ehyd.gv.at/eHYD/AreaSelection/download?cat=owf&reg=10",
     rate_cfg      = list(n = 10, period = 1),
     auth          = list(type = "none")
@@ -30,8 +31,14 @@ register_AT_EHYD <- function() {
 # Keep parameter list discoverable
 #' @export
 timeseries_parameters.hydro_service_AT_EHYD <- function(x, ...) {
-  c("water_discharge", "water_level")
+  c("water_discharge",
+    "water_level",
+    "water_temperature_monthly_mean",
+    "suspended_sediment_daily_load",
+    "bedload_daily_load")
 }
+
+
 
 # -----------------------------------------------------------------------------
 # Constants / parameter mapping (private)
@@ -43,24 +50,63 @@ AT_EHYD_W_DIR        <- "W-Tagesmittel"
 AT_EHYD_META         <- "messstellen_owf.csv"
 
 .at_param_map_AT <- function(parameter) {
-  parameter <- match.arg(parameter, c("water_discharge", "water_level"))
+  parameter <- match.arg(
+    parameter,
+    c("water_discharge",
+      "water_level",
+      "water_temperature_monthly_mean",
+      "suspended_sediment_daily_load",
+      "bedload_daily_load")
+  )
+
   if (parameter == "water_discharge") {
-    list(
-      unit    = "m^3/s",
-      subdir  = AT_EHYD_Q_DIR,
-      prefix  = "Q-Tagesmittel-",
-      param   = "water_discharge",
+    return(list(
+      unit     = "m^3/s",
+      subdir   = AT_EHYD_Q_DIR,          # "Q-Tagesmittel"
+      prefix   = "Q-Tagesmittel-",
+      param    = "water_discharge",
       to_canon = function(x, raw_unit = NULL) suppressWarnings(as.numeric(x))
-    )
-  } else {
-    list(
-      unit    = "m",
-      subdir  = AT_EHYD_W_DIR,
-      prefix  = "W-Tagesmittel-",
-      param   = "water_level",
-      to_canon = function(x, raw_unit = NULL) suppressWarnings(as.numeric(x))
-    )
+    ))
   }
+
+  if (parameter == "water_level") {
+    return(list(
+      unit     = "m",
+      subdir   = AT_EHYD_W_DIR,          # "W-Tagesmittel"
+      prefix   = "W-Tagesmittel-",
+      param    = "water_level",
+      to_canon = function(x, raw_unit = NULL) suppressWarnings(as.numeric(x))
+    ))
+  }
+
+  if (parameter == "water_temperature_monthly_mean") {
+    return(list(
+      unit     = "\u00B0C",
+      subdir   = "WT-Monatsmittel",      # folder name in bundle
+      prefix   = "WT-Monatsmittel-",
+      param    = "water_temperature_monthly_mean",
+      to_canon = function(x, raw_unit = NULL) suppressWarnings(as.numeric(x))
+    ))
+  }
+
+  if (parameter == "suspended_sediment_daily_load") {
+    return(list(
+      unit     = "t",
+      subdir   = "Schwebstoff-Tagesfracht",
+      prefix   = "Schwebstoff-Tagesfracht-",
+      param    = "suspended_sediment_daily_load",
+      to_canon = function(x, raw_unit = NULL) suppressWarnings(as.numeric(x))
+    ))
+  }
+
+  # parameter == "bedload_daily_load"
+  list(
+    unit     = "t",
+    subdir   = "Geschiebe-Tagesfracht",
+    prefix   = "Geschiebe-Tagesfracht-",
+    param    = "bedload_daily_load",
+    to_canon = function(x, raw_unit = NULL) suppressWarnings(as.numeric(x))
+  )
 }
 
 # -----------------------------------------------------------------------------
@@ -93,7 +139,7 @@ AT_EHYD_META         <- "messstellen_owf.csv"
 
   url <- AT_EHYD_URL
   cli::cli_inform(c(
-    "i" = "Downloading eHYD CSV bundle — size can be large…",
+    "i" = "Downloading eHYD CSV bundle - size can be large...",
     " " = url,
     " " = paste0("Destination: ", zip_path)
   ))
@@ -111,7 +157,7 @@ AT_EHYD_META         <- "messstellen_owf.csv"
 
   zip_path <- .at_download_bundle(cache_dir, force = force)
   cli::cli_inform(c(
-    "i" = "Unzipping eHYD bundle…",
+    "i" = "Unzipping eHYD bundle...",
     " " = paste0("Extracting to: ", cache_dir)
   ))
   utils::unzip(zip_path, exdir = cache_dir)
@@ -171,8 +217,8 @@ AT_EHYD_META         <- "messstellen_owf.csv"
   # Parse timestamp: typical "01.01.1996 00:00:00"
   ts <- suppressWarnings(as.POSIXct(dt_str, format = "%d.%m.%Y %H:%M:%S", tz = "UTC"))
   if (all(is.na(ts))) {
-    # Do not attempt other formats; keep NA (e.g., lines like "Invalid; Lücke")
-    ts <- suppressWarnings(as.POSIXct(dt_str, format = "%d.%m.%Y %H:%M:%S", tz = "UTC"))  # will remain NA for "Lücke"
+    # Do not attempt other formats; keep NA (e.g., lines like "Invalid; L\u00FCcke")
+    ts <- suppressWarnings(as.POSIXct(dt_str, format = "%d.%m.%Y %H:%M:%S", tz = "UTC"))  # will remain NA for "L\u00FCcke"
   }
 
   # Numeric with decimal comma handling; strip spaces
@@ -347,11 +393,11 @@ AT_EHYD_META         <- "messstellen_owf.csv"
   # Tell the user this is a one-time build that will be cached
   if (requireNamespace("cli", quietly = TRUE)) {
     cli::cli_inform(c(
-      "i" = sprintf("Building %s cache (first run only, then reused)…", pm$param),
+      "i" = sprintf("Building %s cache (first run only, then reused)...", pm$param),
       " " = sprintf("Target cache file: %s", rds_path)
     ))
   } else {
-    message(sprintf("Building %s cache (first run only, then reused)…\nTarget cache file: %s",
+    message(sprintf("Building %s cache (first run only, then reused)...\nTarget cache file: %s",
                     pm$subdir, rds_path))
   }
 
@@ -511,11 +557,15 @@ stations.hydro_service_AT_EHYD <- function(x, ...) {
 
 #' @export
 timeseries.hydro_service_AT_EHYD <- function(x,
-                                             parameter = c("water_discharge","water_level"),
+                                             parameter = c("water_discharge",
+                                                           "water_level",
+                                                           "water_temperature_monthly_mean",
+                                                           "suspended_sediment_daily_load",
+                                                           "bedload_daily_load"),
                                              stations = NULL,
-                                             mode = c("complete","range"),
                                              start_date = NULL,
                                              end_date   = NULL,
+                                             mode = c("complete","range"),
                                              ...) {
   parameter <- match.arg(parameter)
   pm        <- .at_param_map_AT(parameter)

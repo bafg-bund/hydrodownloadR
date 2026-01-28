@@ -2,11 +2,11 @@
 % Please edit documentation in R/helpers.R
 \name{normalize_utf8}
 \alias{normalize_utf8}
-\title{Normalize likely-misencoded UTF-8 text (fix common "Ã…" mojibake)}
+\title{Normalize likely-misencoded UTF-8 text (fix common UTF-8 mojibake)}
 \usage{
 normalize_utf8(x)
 }
 \description{
-Normalize likely-misencoded UTF-8 text (fix common "Ã…" mojibake)
+Normalize likely-misencoded UTF-8 text (fix common UTF-8 mojibake)
 }
 \keyword{internal}

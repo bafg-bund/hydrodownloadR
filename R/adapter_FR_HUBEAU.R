@@ -1,17 +1,19 @@
 # R/adapter_FR_HUBEAU.R
-# France – Hub’Eau (Eaufrance) adapter
-# Hydrométrie v2 + Température v1
-# Docs (hydrométrie): https://hubeau.eaufrance.fr/page/api-hydrometrie
-# Docs (température): https://hubeau.eaufrance.fr/page/api-temperature-continu
+# France - Hub'Eau (Eaufrance) adapter
+# Hydrometrie v2 + Temperature v1
+# Docs (hydrometrie): https://hubeau.eaufrance.fr/page/api-hydrometrie
+# Docs (temperature): https://hubeau.eaufrance.fr/page/api-temperature-continu
 # Units/time: H=mm, Q=l/s (convert), UTC timestamps. [see docs]
 
 # ---- registration ------------------------------------------------------------
 
+#' @keywords internal
+#' @noRd
 register_FR_HUBEAU <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "FR_HUBEAU",
-    provider_name = "France – Hub’Eau (Eaufrance) API",
-    country       = "FR",
+    provider_name = "Hub'Eau (Eaufrance) API",
+    country       = "France",
     base_url      = "https://hubeau.eaufrance.fr",
     rate_cfg      = list(n = 3, period = 1),
     auth          = list(type = "none")
@@ -59,7 +61,7 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
            stations_path = "/api/v1/temperature/station",
            ts_path       = "/api/v1/temperature/chronique",
            fixed_qs      = list(),
-           unit          = "°C",
+           unit          = "\u00B0C",
            convert       = function(x) x
          ),
 
@@ -98,17 +100,17 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
   x <- gsub("\u202F|\u00A0", " ", x)
   x <- trimws(x)
 
-  # Keep only digits, sign, and separators; drop all letters/symbols (km, m, ², etc.)
+  # Keep only digits, sign, and separators; drop all letters/symbols (km, m, etc.)
   x2 <- gsub("[^0-9,.-]", "", x)
   if (!nzchar(x2)) return(NA_real_)
 
   # Decide decimal separator by the last separator pattern
   if (grepl(",\\d{1,3}$", x2)) {
-    # decimal comma → drop thousands dots, then comma→dot
+    # decimal comma to drop thousands dots, then comma to dot
     x2 <- gsub("\\.", "", x2)
     x2 <- sub(",", ".", x2)
   } else if (grepl("\\.\\d{1,3}$", x2)) {
-    # decimal dot → drop thousands commas
+    # decimal dot to drop thousands commas
     x2 <- gsub(",", "", x2)
   } else {
     # looks like an integer; drop any stray separators
@@ -131,15 +133,15 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
       )
       if (!is.null(node)) {
         valtxt <- xml2::xml_text(node, trim = TRUE)
-        # remove trailing "km²"/"km2" (case-insensitive), then parse
-        valtxt_num <- sub("(?i)\\s*km\\s*(?:²|2)\\s*$", "", valtxt, perl = TRUE)
+        valtxt_ascii <- gsub("\\u00B2", "2", valtxt, perl = TRUE)  #
+        valtxt_num   <- sub("\\s*km\\s*2\\s*$", "", valtxt_ascii, perl = TRUE)
         num <- .fr_num_fr(valtxt_num)
         if (!is.na(num)) return(num)
       }
     }
   }
-  # regex fallback (DOTALL), tolerate km² or km2
-  rx <- "(?s)Surface de bassin versant topographique.*?<span>\\s*([0-9][0-9\\s.,\u00A0\u202F]*)\\s*km(?:\\s*²|2)"
+
+  rx <- "(?s)Surface de bassin versant topographique.*?<span>\\s*([0-9][0-9\\s.,\u00A0\u202F]*)\\s*km(?:\\s*\\u00B2|2)"
   m  <- regexec(rx, html_txt, perl = TRUE)
   g  <- regmatches(html_txt, m)
   if (length(g) && length(g[[1]]) >= 2) return(.fr_num_fr(g[[1]][2]))
@@ -154,7 +156,7 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
       # xml2 resolves &#039; to an apostrophe ' in text()
       node <- xml2::xml_find_first(
         doc,
-        "//span[normalize-space(.)=\"Cote du zéro d'échelle\"]/following-sibling::span[1]"
+        "//span[normalize-space(.)=\"Cote du z\u00E9ro d'\u00E9chelle\"]/following-sibling::span[1]"
       )
       if (!is.null(node)) {
         valtxt <- xml2::xml_text(node, trim = TRUE)
@@ -165,8 +167,8 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
       }
     }
   }
-  # regex fallback — accept either literal ' or &#039;
-  rx <- "(?s)Cote du z[ée]ro d(?:'|&#039;)échelle.*?<span>\\s*([0-9][0-9\\s.,\u00A0\u202F]*)\\s*m"
+  # regex fallback - accept either literal ' or &#039;
+  rx <- "(?s)Cote du z[\u00E9e]ro d(?:'|&#039;)\u00E9chelle.*?<span>\\s*([0-9][0-9\\s.,\u00A0\u202F]*)\\s*m"
   m  <- regexec(rx, html_txt, perl = TRUE)
   g  <- regmatches(html_txt, m)
   if (length(g) && length(g[[1]]) >= 2) return(.fr_num_fr(g[[1]][2]))
@@ -190,7 +192,7 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
         if (!is.na(num)) return(num)
       }
       # 2) fallbacks previously seen on some fiches
-      labels <- c("Altitude du site", "Altitude du repère", "Altitude du repère géodésique")
+      labels <- c("Altitude du site", "Altitude du rep\u00E8re", "Altitude du rep\u00E8re g\u00E9od\u00E9sique")
       for (lb in labels) {
         node2 <- xml2::xml_find_first(doc, sprintf("//span[normalize-space(.)='%s']/following-sibling::span[1]", lb))
         if (!is.null(node2)) {
@@ -210,7 +212,7 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
   NA_real_
 }
 
-# Station altitude (gauge zero): label "Cote du zéro d'échelle" on station fiche.# Gauge zero ("Cote du zéro d'échelle") from station fiche
+# Station altitude (gauge zero): label "Cote du z\u00E9ro d'\u00E9chelle" on station fiche.# Gauge zero ("Cote du z\u00E9ro d'\u00E9chelle") from station fiche
 .fr_html_extract_station_gauge_zero <- function(html_txt) {
   if (!nzchar(html_txt)) return(NA_real_)
 
@@ -220,7 +222,7 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
     if (!is.null(doc)) {
       # Find the *label span* then take its immediate following value span
       # Normalize NBSP (\u00A0) and thin NBSP (\u202F) to regular spaces inside the XPath
-      xp <- "//span[contains(@class,'identity__label') and normalize-space(translate(., '\u00A0\u202F', '  '))=\"Cote du zéro d'échelle\"]/following-sibling::span[1]"
+      xp <- "//span[contains(@class,'identity__label') and normalize-space(translate(., '\u00A0\u202F', '  '))=\"Cote du z\u00E9ro d'\u00E9chelle\"]/following-sibling::span[1]"
       node <- xml2::xml_find_first(doc, xp)
       if (!inherits(node, "xml_missing") && !is.null(node)) {
         txt <- xml2::xml_text(node, trim = TRUE)
@@ -235,7 +237,7 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
   }
 
   # 2) Regex fallback (only the immediate sibling span of the label)
-  rx <- "(?is)Cote du z[ée]ro d(?:'|&#039;)échelle\\s*</span>\\s*<span>\\s*([0-9][0-9\\s.,\u00A0\u202F]*)\\s*m\\s*</span>"
+  rx <- "(?is)Cote du z[\u00E9e]ro d(?:'|&#039;)\u00E9chelle\\s*</span>\\s*<span>\\s*([0-9][0-9\\s.,\u00A0\u202F]*)\\s*m\\s*</span>"
   m  <- regexec(rx, html_txt, perl = TRUE)
   g  <- regmatches(html_txt, m)
   if (length(g) && length(g[[1]]) >= 2) {
@@ -424,7 +426,7 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
     html <- tryCatch(httr::content(r, as = "text", encoding = "UTF-8"), error = function(e) "")
     tibble::tibble(
       station_id       = sid,
-      altitude_station = .fr_html_extract_station_gauge_zero(html) # m (Cote du zéro d'échelle)
+      altitude_station = .fr_html_extract_station_gauge_zero(html) # m (Cote du z\u00E9ro d'\u00E9chelle)
     )
   })
 
@@ -464,14 +466,14 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
   dplyr::bind_rows(lapply(res_list, tibble::as_tibble))
 }
 
-# Site-level vertical datum: label after "Système altimétrique"
+# Site-level vertical datum: label after "Syst\u00E8me altim\u00E9trique"
 .fr_html_extract_site_datum <- function(html_txt) {
   if (!nzchar(html_txt)) return(NA_character_)
   if (requireNamespace("xml2", quietly = TRUE)) {
     doc <- tryCatch(xml2::read_html(html_txt, encoding = "UTF-8"), error = function(e) NULL)
     if (!is.null(doc)) {
       # Attempt 1: exact match after converting NBSP + NNBSP to regular space
-      xp1 <- "//span[normalize-space(translate(., '\u00A0\u202F', '  '))='Système altimétrique']/following-sibling::span[1]"
+      xp1 <- "//span[normalize-space(translate(., '\u00A0\u202F', '  '))='Syst\u00E8me altim\u00E9trique']/following-sibling::span[1]"
       node <- xml2::xml_find_first(doc, xp1)
       if (!inherits(node, "xml_missing") && !is.null(node)) {
         val <- xml2::xml_text(node, trim = TRUE)
@@ -479,7 +481,7 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
       }
 
       # Attempt 2: looser 'contains' on the label, then take the 2nd span in the field
-      xp2 <- "//div[contains(@class,'identity__field')][span[contains(translate(., '\u00A0\u202F', '  '), 'Système') and contains(., 'altim')]]/span[position()=2]"
+      xp2 <- "//div[contains(@class,'identity__field')][span[contains(translate(., '\u00A0\u202F', '  '), 'Syst\u00E8me') and contains(., 'altim')]]/span[position()=2]"
       node <- xml2::xml_find_first(doc, xp2)
       if (!inherits(node, "xml_missing") && !is.null(node)) {
         val <- xml2::xml_text(node, trim = TRUE)
@@ -492,7 +494,7 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
         lab_txt <- xml2::xml_text(labs, trim = TRUE)
         lab_norm <- gsub("[\u00A0\u202F]", " ", lab_txt)       # NBSP/NNBSP -> space
         lab_norm <- gsub("\\s+", " ", lab_norm)                # collapse
-        hit <- which(lab_norm == "Système altimétrique")
+        hit <- which(lab_norm == "Syst\u00E8me altim\u00E9trique")
         if (length(hit)) {
           sib <- xml2::xml_find_first(labs[[hit[1]]], "following-sibling::span[1]")
           val <- xml2::xml_text(sib, trim = TRUE)
@@ -503,7 +505,7 @@ timeseries_parameters.hydro_service_FR_HUBEAU <- function(x, ...) {
   }
 
   # Regex fallback
-  rx <- "(?is)Syst[èe]me\\s*altim[ée]trique\\s*</span>\\s*<span>\\s*([^<]+?)\\s*</span>"
+  rx <- "(?is)Syst[\u00E8e]me\\s*altim[\u00E9e]trique\\s*</span>\\s*<span>\\s*([^<]+?)\\s*</span>"
   m  <- regexec(rx, html_txt, perl = TRUE)
   g  <- regmatches(html_txt, m)
   if (length(g) && length(g[[1]]) >= 2) return(trimws(g[[1]][2]))
@@ -646,7 +648,7 @@ stations.hydro_service_FR_HUBEAU <- function(
   hm <- if (include_hydrometry)  tibble::as_tibble(get_paged(hm_path) %||% tibble::tibble()) else tibble::tibble()
   tp <- if (include_temperature) tibble::as_tibble(get_paged(tp_path) %||% tibble::tibble()) else tibble::tibble()
 
-  # hydrometry rows (note: API altitude is in mm → m)
+  # hydrometry rows (note: API altitude is in mm to m)
   hm_tbl <- if (nrow(hm)) tibble::tibble(
     code_site    = col_or_null(hm, "code_site"),
     station_id   = col_or_null(hm, "code_station"),
@@ -691,7 +693,7 @@ stations.hydro_service_FR_HUBEAU <- function(
     ))
   }
 
-  # dedupe by station_id (defensive — hydrometry vs temperature are disjoint in practice)
+  # dedupe by station_id (defensive - hydrometry vs temperature are disjoint in practice)
   both <- dplyr::distinct(both, .data$station_id, .keep_all = TRUE)
 
   # ----------------------- precomputed meta (fast path) -----------------------
@@ -781,7 +783,7 @@ stations.hydro_service_FR_HUBEAU <- function(
   out <- tibble::tibble(
     country            = "FR",
     provider_id        = "FR_HUBEAU",
-    provider_name      = "France – Hub’Eau (Eaufrance) API",
+    provider_name      = "France - Hub'Eau (Eaufrance) API",
     station_id         = both$station_id,
     station_name       = both$station_name,
     station_name_ascii = both$station_name_ascii,
@@ -789,7 +791,7 @@ stations.hydro_service_FR_HUBEAU <- function(
     river_ascii        = both$river_ascii,
     lat                = both$lat,
     lon                = both$lon,
-    area               = both$area,             # km² when available
+    area               = both$area,             # km\\u00B2 when available
     altitude_station   = both$altitude_station, # gauge zero (m)
     altitude_api       = both$altitude_api,     # API referential (m)
     altitude_site      = both$altitude_site,    # site fiche (m)
@@ -897,7 +899,7 @@ timeseries.hydro_service_FR_HUBEAU <- function(x,
   tibble::tibble(
     country        = "FR",
     provider_id    = "FR_HUBEAU",
-    provider_name  = "France – Hub’Eau (Eaufrance) API",
+    provider_name  = "France - Hub'Eau (Eaufrance) API",
     station_id     = character(),
     parameter      = parameter,
     timestamp      = as.POSIXct(character(), tz = "UTC"),
@@ -909,7 +911,7 @@ timeseries.hydro_service_FR_HUBEAU <- function(x,
   )
 }
 
-# ---------- hydrométrie realtime (H) with cursor ------------------------------
+# ---------- hydrom\u00E9trie realtime (H) with cursor ------------------------------
 .do_hm_rt_chunk <- function(x, ids, pm, rng, limiter) {
 
   # optional fallback for vertical datum from precomputed meta (if present)
@@ -971,7 +973,7 @@ timeseries.hydro_service_FR_HUBEAU <- function(x,
     tibble::tibble(
       country        = "FR",
       provider_id    = "FR_HUBEAU",
-      provider_name  = "France – Hub’Eau (Eaufrance) API",
+      provider_name  = "France - Hub'Eau (Eaufrance) API",
       station_id     = df$code_station %||% st_id,
       parameter      = "water_level",
       timestamp      = df$ts,
@@ -986,7 +988,7 @@ timeseries.hydro_service_FR_HUBEAU <- function(x,
   dplyr::bind_rows(lapply(ids, fetch_one))
 }
 
-# ---------- hydrométrie daily elaborated (QmnJ) -------------------------------
+# ---------- hydrom\u00E9trie daily elaborated (QmnJ) -------------------------------
 .do_hm_elab_chunk <- function(x, ids, pm, rng, limiter) {
   fetch_one <- function(st_id) {
     size <- 20000L
@@ -1048,7 +1050,7 @@ timeseries.hydro_service_FR_HUBEAU <- function(x,
     tibble::tibble(
       country        = "FR",
       provider_id    = "FR_HUBEAU",
-      provider_name  = "France – Hub’Eau (Eaufrance) API",
+      provider_name  = "France - Hub'Eau (Eaufrance) API",
       station_id     = out$code_station %||% st_id,
       parameter      = "water_discharge",
       timestamp      = out$ts,
@@ -1117,7 +1119,7 @@ timeseries.hydro_service_FR_HUBEAU <- function(x,
     tibble::tibble(
       country        = "FR",
       provider_id    = "FR_HUBEAU",
-      provider_name  = "France – Hub’Eau (Eaufrance) API",
+      provider_name  = "France - Hub'Eau (Eaufrance) API",
       station_id     = df$code_station %||% st_id,
       parameter      = "water_temperature",
       timestamp      = df$ts,

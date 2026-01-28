@@ -1,14 +1,16 @@
-# UK – National River Flow Archive (NRFA) adapter
+# UK - National River Flow Archive (NRFA) adapter
 # Provider: UK_NRFA
 # Base URL: https://nrfaapps.ceh.ac.uk
 
 # ---- registration -----------------------------------------------------------
 
+#' @keywords internal
+#' @noRd
 register_UK_NRFA <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "UK_NRFA",
-    provider_name = "UK – National River Flow Archive (NRFA)",
-    country       = "UK",
+    provider_name = "National River Flow Archive (NRFA)",
+    country       = "United Kingdom",
     base_url      = "https://nrfaapps.ceh.ac.uk",
     rate_cfg      = list(n = 3, period = 1),
     auth          = list(type = "none")

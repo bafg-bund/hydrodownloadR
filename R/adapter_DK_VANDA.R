@@ -1,14 +1,16 @@
-# ==== Denmark (VandA / Miljøportal) adapter =================================
+# ==== Denmark (VandA / Miljoportal) adapter =================================
 # Base: "https://vandah.miljoeportal.dk"
 # Optional GeoJSON for coordinates:     set geo_base_url if there is one; else leave NULL
 
 # -- Registration -------------------------------------------------------------
 
+#' @keywords internal
+#' @noRd
 register_DK_VANDA <- function() {
-  register_service(
+  register_service_usage(
     provider_id   = "DK_VANDA",
-    provider_name = "Denmark – VandA (Miljøportal) API",
-    country       = "DK",
+    provider_name = "VandA (Milj\u00F8portal) API",
+    country       = "Denmark",
     base_url      = "https://vandah.miljoeportal.dk",   # TODO: confirm base
     geo_base_url  = NULL,                               # set if a GeoJSON host exists
     rate_cfg      = list(n = 3, period = 1),

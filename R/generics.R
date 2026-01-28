@@ -4,6 +4,17 @@
 #' @param ... Passed to provider-specific methods.
 #' @return A tibble with station metadata.
 #' @export
+#'
+#' @examples
+#' # Offline: enumerate providers (no network)
+#' s <- hydro_services()
+#' head(names(s))
+#'
+#' @examplesIf interactive() && requireNamespace("curl", quietly = TRUE) && curl::has_internet() && identical(Sys.getenv("HYDRO_EXAMPLES"), "true")
+#' # Online (opt-in): fetch stations
+#' x <- hydro_service("SE_SMHI")
+#' st <- stations(x)
+#' head(st)
 stations <- function(x, ...) UseMethod("stations")
 
 #' Retrieve time series for a provider
@@ -18,6 +29,18 @@ stations <- function(x, ...) UseMethod("stations")
 #'   country, provider_id, provider_name, station_id, parameter,
 #'   timestamp, value, unit, quality_code, source_url.
 #' @export
+#'
+#' @examples
+#' # Offline: construct a service object (no network)
+#' x <- hydro_service("SE_SMHI")
+#'
+#' @examplesIf interactive() && requireNamespace("curl", quietly = TRUE) && curl::has_internet() && identical(Sys.getenv("HYDRO_EXAMPLES"), "true")
+#' # Online (opt-in): one station for a short range
+#' st <- head(stations(x)$station_id, 1)
+#' ts <- timeseries(x, parameter = "water_discharge",
+#'                  stations = st,
+#'                  start_date = "2020-01-01", end_date = "2020-01-10")
+#' head(ts)
 timeseries <- function(x, parameter, stations = NULL,
                        start_date = NULL, end_date = NULL,
                        mode = c("range","complete"), ...) {

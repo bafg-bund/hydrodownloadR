@@ -26,7 +26,9 @@
   register_CL_DGA()
   register_SI_ARSO()
   register_ZA_DWS()
-  register_KR_WAMIS()
+  # register_KR_WAMIS()
   register_ES_ROAN()
   register_AR_INA()
+  register_CH_BAFU()
+  register_BA_AVPS()
 }
