@@ -64,7 +64,6 @@ col_or_null <- function(df, col) {
 }
 
 # ASCII-safe km^2 parser (PCRE2 compatible)
-# Examples it understands: "1,00 km2", "12.345,67 km^2", "Area = 3.5 km²"
 parse_area_km2 <- function(x) {
   if (is.null(x)) return(NA_real_)
   x <- as.character(x)
