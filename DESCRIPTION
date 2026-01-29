@@ -16,7 +16,7 @@ Description: Provides a unified, extensible interface to discover
     Designed for reproducible workflows and straightforward addition of
     new providers.
 License: MIT + file LICENSE
-URL: https://github.com/bafg-bund/hydrodownloadR
+URL: https://bafg-bund.github.io/hydrodownloadR/, https://github.com/bafg-bund/hydrodownloadR
 BugReports: https://github.com/bafg-bund/hydrodownloadR/issues
 Depends:
     R (>= 3.6)
