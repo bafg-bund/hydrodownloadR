@@ -18,8 +18,8 @@ discovering hydrological stations and downloading daily time series
 national/regional public APIs. The package uses a provider registry with
 identifiers (`provider_id`, `provider_name`) and S3 generics
 `stations()` / `timeseries()`. It supports complete histories
-(1900-01-01 → today), per-station selection, rate limiting & retries,
-optional auth via environment variables, UTF-8→ASCII normalization, and
+(1900-01-01 until today), per-station selection, rate limiting & retries,
+optional auth via environment variables, UTF-8 to ASCII normalization, and
 coordinate transformation to WGS84.
 
 > Built for reproducible workflows and easy addition of new providers.
@@ -30,9 +30,9 @@ coordinate transformation to WGS84.
 
 ### Development version (GitHub)
 
-\`\`\`r \# Option A: remotes install.packages(“remotes”)
-remotes::install_github(“bafg-bund/hydrodownloadR”)
+\`\`\`r \# Option A: remotes install.packages("remotes")
+remotes::install_github("bafg-bund/hydrodownloadR")
 
 # Option B: pak (fast)
 
-install.packages(“pak”) pak::pak(“bafg-bund/hydrodownloadR”)
+install.packages("pak") pak::pak("bafg-bund/hydrodownloadR")

@@ -10,7 +10,7 @@ Description: Provides a unified, extensible interface to discover
     discharge, water level, water temperature, and several other water
     quality parameter) from national and regional public APIs. Includes a
     provider registry, S3 generics 'stations' and 'timeseries', licensing
-    metadata, date-range and “complete history” modes, rate limiting and
+    metadata, date-range and 'complete history' modes, rate limiting and
     retries, optional authentication via environment variables, tidy
     outputs, UTF-8 to ASCII transliteration, and WGS84 coordinates.
     Designed for reproducible workflows and straightforward addition of

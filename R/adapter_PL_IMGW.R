@@ -263,7 +263,7 @@ stations.hydro_service_PL_IMGW <- function(x, ...) {
     altitude           = NA_real_
   )
 
-  # after you've built the base_df from the public CSV…
+  # after you've built the base_df from the public CSV...
   md <- .pkg_data("pl_imgw_meta")  # <- loads the packaged tibble from /data
   if (is.data.frame(md) && nrow(md)) {
     out <- dplyr::left_join(out, md, by = "station_id", suffix = c("", "_md"))
