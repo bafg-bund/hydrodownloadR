@@ -1,6 +1,6 @@
 # FR_HUBEAU precomputed station metadata
 
-Preloaded metadata for Hub'Eau stations, built offline from the Hub’Eau
+Preloaded metadata for Hub'Eau stations, built offline from the Hub'Eau
 referentials plus scraped site/station fiches (area, site altitude,
 gauge-zero altitude, vertical datum at site). Used to speed up
 [`stations()`](https://bafg-bund.github.io/hydrodownloadR/reference/stations.md)
@@ -33,7 +33,7 @@ A data frame/tibble with columns:
 
 - altitude_station:
 
-  Numeric (m). “Cote du zero d'echelle” from station fiche; may be `NA`.
+  Numeric (m). 'Cote du zero d'echelle' from station fiche; may be `NA`.
 
 - vertical_datum_site:
 

@@ -8,10 +8,10 @@ identifiers (`provider_id`, `provider_name`) and S3 generics
 [`stations()`](https://bafg-bund.github.io/hydrodownloadR/reference/stations.md)
 /
 [`timeseries()`](https://bafg-bund.github.io/hydrodownloadR/reference/timeseries.md).
-It supports complete histories (1900-01-01 → today), per-station
+It supports complete histories (1900-01-01 until today), per-station
 selection, rate limiting & retries, optional auth via environment
-variables, UTF-8→ASCII normalization, and coordinate transformation to
-WGS84.
+variables, UTF-8 to ASCII normalization, and coordinate transformation
+to WGS84.
 
 > Built for reproducible workflows and easy addition of new providers.
 
