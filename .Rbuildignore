@@ -11,3 +11,5 @@
 ^CRAN-SUBMISSION$
 ^cran-comments\.md$
 ^revdep$
+^release-assets$
+^_pkgdown\.yml\.bak$

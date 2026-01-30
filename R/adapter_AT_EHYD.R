@@ -262,12 +262,12 @@ AT_EHYD_META         <- "messstellen_owf.csv"
   nms <- names(df)
   # date col heuristics
   date_candidates  <- c("Datum", "Date", "DATUM", "Zeitpunkt", "Zeit", "time", "TAG", "Tag")
-  date_col <- Intersect(date_candidates, nms)
+  date_col <- intersect(date_candidates, nms)
   date_col <- if (length(date_col)) date_col[1] else nms[1]
 
   # value col heuristics
   value_candidates <- c("Wert", "MW", "Tagesmittel", "Value", "Q", "W")
-  value_col <- Intersect(value_candidates, nms)
+  value_col <- intersect(value_candidates, nms)
   value_col <- if (length(value_col)) value_col[1] else if (length(nms) >= 2) nms[2] else nms[1]
 
   # parse date -> Date (fallback POSIX then Date)

@@ -22,7 +22,6 @@ Depends:
     R (>= 3.6)
 Imports:
     cli,
-    data.table,
     dataRetrieval,
     DBI,
     dplyr,
@@ -37,8 +36,17 @@ Imports:
     rlang,
     RSQLite,
     sf,
+	magrittr,
     tibble
 Suggests:
+    odbc,
+    purrr,
+    readr,
+    readxl,
+    rvest,
+    tidyr,
+    tidyselect,
+    xml2,
     cachem,
     curl,
     memoise,

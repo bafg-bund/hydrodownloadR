@@ -146,18 +146,29 @@ timeseries_parameters.hydro_service_US_USGS_NWIS <- function(x, ...) {
   }, error = function(e) FALSE)
 }
 
-# state table: drop NA STUSAB; keep 50 states + DC + GU/MP/PR/VI
-.usgs_state_table <- function() {
-  tbl <- tryCatch(get("stateCd", envir = asNamespace("dataRetrieval")), error = function(e) NULL)
-  if (is.null(tbl)) tbl <- tryCatch(dataRetrieval::stateCd, error = function(e) NULL)
-  if (is.null(tbl)) rlang::abort("US_USGS: could not access dataRetrieval::stateCd.")
+.usgs_state_table <- local({
+  cache <- NULL
 
-  allowed <- c(state.abb, "DC", "GU", "MP", "PR", "VI")
-  tbl <- subset(tbl, !is.na(STUSAB) & STUSAB %in% allowed)
-  tbl <- tbl[!is.na(tbl$STATE), , drop = FALSE]
-  tbl <- tbl[order(as.integer(tbl$STATE)), , drop = FALSE]
-  tbl
-}
+  function() {
+    if (!is.null(cache)) return(cache)
+
+    tbl <- tryCatch(get("stateCd", envir = asNamespace("dataRetrieval")), error = function(e) NULL)
+    if (is.null(tbl)) tbl <- tryCatch(dataRetrieval::stateCd, error = function(e) NULL)
+    if (is.null(tbl)) rlang::abort("US_USGS: could not access dataRetrieval::stateCd.")
+
+    # Load datasets::state.abb safely (it's a dataset, not an exported object)
+    tmp <- new.env(parent = emptyenv())
+    utils::data(list = "state.abb", package = "datasets", envir = tmp)
+    allowed <- c(tmp$state.abb, "DC", "GU", "MP", "PR", "VI")
+
+    tbl <- tbl[!is.na(tbl$STUSAB) & tbl$STUSAB %in% allowed, , drop = FALSE]
+    tbl <- tbl[!is.na(tbl$STATE), , drop = FALSE]
+    tbl <- tbl[order(as.integer(tbl$STATE)), , drop = FALSE]
+
+    cache <<- tbl
+    tbl
+  }
+})
 
 # one state request (auto-paginated by dataRetrieval)
 .usgs_request_state <- function(state_code_numeric,
@@ -256,7 +267,6 @@ timeseries_parameters.hydro_service_US_USGS_NWIS <- function(x, ...) {
       )
 
       accum <- .usgs_bind_dedupe(list(accum), st_df)
-      .usgs_save_cache_partial(st_df)
 
       Sys.sleep(sleep_between)
     }
@@ -279,15 +289,6 @@ timeseries_parameters.hydro_service_US_USGS_NWIS <- function(x, ...) {
   if (!length(parts)) return(NULL)
   out <- if (requireNamespace("purrr", quietly = TRUE)) purrr::list_rbind(parts) else do.call(rbind, parts)
   dplyr::distinct(out, .data$site_no, .keep_all = TRUE)
-}
-
-.usgs_save_cache_partial <- function(add_df) {
-  # Append to cache incrementally so we never lose progress mid-run
-  p <- .usgs_cache_path()
-  cur <- if (file.exists(p)) tryCatch(readRDS(p), error = function(e) NULL) else NULL
-  merged <- .usgs_bind_dedupe(list(cur), add_df)
-  if (!is.null(merged)) saveRDS(merged, p)
-  invisible(TRUE)
 }
 
 .usgs_latest_snapshot_file <- function() {
