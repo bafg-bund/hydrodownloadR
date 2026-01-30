@@ -33,7 +33,7 @@ A data frame/tibble with columns:
 
 - altitude_station:
 
-  Numeric (m). 'Cote du zero d'echelle' from station fiche; may be `NA`.
+  Numeric (m). "Cote du zero d'echelle" from station fiche; may be `NA`.
 
 - vertical_datum_site:
 
