@@ -51,27 +51,104 @@
 </h1></div>
 <!-- badges: start -->
 
-<p><strong>hydrodownloadR</strong> provides a unified, extensible interface for discovering hydrological stations and downloading daily time series (water discharge, water level, water temperature, flow velocity) from national/regional public APIs. The package uses a provider registry with identifiers (<code>provider_id</code>, <code>provider_name</code>) and S3 generics <code><a href="reference/stations.html">stations()</a></code> / <code><a href="reference/timeseries.html">timeseries()</a></code>. It supports complete histories (1900-01-01 until today), per-station selection, rate limiting &amp; retries, optional auth via environment variables, UTF-8 to ASCII normalization, and coordinate transformation to WGS84.</p>
+<p><strong>hydrodownloadR</strong> provides a unified, extensible interface for discovering hydrological stations and downloading daily time series (e.g., water discharge, water level, water temperature, and several other water quality parameters) from national/regional public APIs. The package uses a provider registry with identifiers (<code>provider_id</code>, <code>provider_name</code>) and S3 generics <code><a href="reference/stations.html">stations()</a></code> / <code><a href="reference/timeseries.html">timeseries()</a></code>. It supports complete histories (1900-01-01 until today), per-station selection, rate limiting and retries, optional authentication via environment variables, UTF-8 to ASCII normalization, and coordinate transformation to WGS84.</p>
 <blockquote>
-<p>Built for reproducible workflows and easy addition of new providers.</p>
+<p>Built for reproducible workflows and straightforward addition of new providers.</p>
 </blockquote>
 <hr>
+<div class="section level2">
+<h2 id="why-this-package-exists">Why this package exists<a class="anchor" aria-label="anchor" href="#why-this-package-exists"></a>
+</h2>
+<p>This package is developed and used at the Global Runoff Data Centre (GRDC, BfG) as part of reproducible workflows to discover stations and retrieve update time series from public APIs. It is also suitable for other global data centres hosted by BfG (Federal Institute of Hydrology) that rely on consistent, auditable data access and update pipelines.</p>
+<hr>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="section level3">
 <h3 id="development-version-github">Development version (GitHub)<a class="anchor" aria-label="anchor" href="#development-version-github"></a>
 </h3>
-<p>```r # Option A: remotes install.packages(“remotes”) remotes::install_github(“bafg-bund/hydrodownloadR”)</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Option A: remotes</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"bafg-bund/hydrodownloadR"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Option B: pak (fast)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"bafg-bund/hydrodownloadR"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="cran-version-planned">CRAN version (planned)<a class="anchor" aria-label="anchor" href="#cran-version-planned"></a>
+</h3>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"hydrodownloadR"</span><span class="op">)</span></span></code></pre></div>
+<hr>
 </div>
 </div>
+<div class="section level2">
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+</h2>
+<p>List available providers:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bafg-bund.github.io/hydrodownloadR/">hydrodownloadR</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">hs</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hydro_services.html">hydro_services</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">hs</span></span></code></pre></div>
+<p><code>hs</code> includes an overview of providers and (where available) licensing / terms information to help users understand access and reuse conditions.</p>
+<p>Select one provider and list stations:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hydro_service.html">hydro_service</a></span><span class="op">(</span><span class="va">hs</span><span class="op">$</span><span class="va">provider_id</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">stn</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/stations.html">stations</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="va">stn</span></span></code></pre></div>
+<p>Check which time series parameters are available for this provider:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/timeseries_parameters.html">timeseries_parameters</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
+<p>Download a daily time series for one station:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/timeseries.html">timeseries</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  stations  <span class="op">=</span> <span class="va">stn</span><span class="op">$</span><span class="va">station_id</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
+<span>  parameter <span class="op">=</span> <span class="st">"water_discharge"</span>,</span>
+<span>  mode      <span class="op">=</span> <span class="st">"complete"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">ts</span></span></code></pre></div>
+<hr>
 </div>
-<div class="section level1">
-<h1 id="option-b-pak-fast">Option B: pak (fast)<a class="anchor" aria-label="anchor" href="#option-b-pak-fast"></a>
-</h1>
-<p>install.packages(“pak”) pak::pak(“bafg-bund/hydrodownloadR”)</p>
+<div class="section level2">
+<h2 id="provider-specific-options-and-complete-history">Provider-specific options and “complete history”<a class="anchor" aria-label="anchor" href="#provider-specific-options-and-complete-history"></a>
+</h2>
+<p>Upstream APIs differ. Some providers expose additional options such as authentication, quality flags, paging strategies, or “complete history” modes. These options may evolve as providers change their APIs. For best results:</p>
+<ul>
+<li>Start with defaults.</li>
+<li>Check the help pages: <code><a href="reference/hydro_service.html">?hydro_service</a></code>, <code><a href="reference/stations.html">?stations</a></code>, <code><a href="reference/timeseries.html">?timeseries</a></code>, <code><a href="reference/timeseries_parameters.html">?timeseries_parameters</a></code>.</li>
+<li>Review provider-specific notes (when linked from the provider registry).</li>
+</ul>
+<p>Tip: if an adapter exposes a flag that must be explicitly enabled (for example, a complete-history mode), set it explicitly in your scripts so results remain reproducible and robust to upstream changes.</p>
+<hr>
 </div>
-
+<div class="section level2">
+<h2 id="licensing-and-terms-of-use">Licensing and terms of use<a class="anchor" aria-label="anchor" href="#licensing-and-terms-of-use"></a>
+</h2>
+<p>This package provides technical access to data services. Data access and reuse are governed by each provider’s terms and licensing conditions. Please review and comply with those terms and licensing conditions when using downloaded data.</p>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="contributing-and-support">Contributing and support<a class="anchor" aria-label="anchor" href="#contributing-and-support"></a>
+</h2>
+<p>Contributions are welcome:</p>
+<ul>
+<li>Use GitHub Issues for bug reports, feature requests, and new provider requests.</li>
+<li>If you report a bug, please include provider_id, station_id (if relevant), parameter, time range, a minimal reproducible snippet, and <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo()</a></code>.</li>
+</ul>
+<p>Pull requests are welcome. Please ensure CI is green (R CMD check) and keep new code ASCII-friendly where possible.</p>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="development-note-ai-assistance">Development note (AI assistance)<a class="anchor" aria-label="anchor" href="#development-note-ai-assistance"></a>
+</h2>
+<p>Portions of this project were drafted with AI assistance (ChatGPT) and then reviewed, edited, and tested by the maintainer. All changes are maintained via version control and validated with automated checks.</p>
+</div>
+</div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
