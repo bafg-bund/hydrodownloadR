@@ -1,6 +1,6 @@
 Package: hydrodownloadR
 Title: Hydrologic Station Catalogs and Time Series from Public APIs
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Henning", "Plessow", , "h.plessow@googlemail.com", role = c("aut", "cre")),
     person("Global Runoff Data Centre", , , "grdc@bafg.de", role = "ctb")
