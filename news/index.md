@@ -1,5 +1,10 @@
 # Changelog
 
+## hydrodownloadR 0.1.1
+
+- Fix HTML manual validation for pl_imgw_meta documentation.
+- Minor DESCRIPTION wording updates.
+
 ## hydrodownloadR 0.1.0
 
 - Initial internal release.
