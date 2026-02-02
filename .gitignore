@@ -25,3 +25,4 @@ data-raw/*
 !data-raw/*.R
 !data-raw/README*
 release-assets/*
+CRAN-SUBMISSION
