@@ -13,3 +13,4 @@
 ^revdep$
 ^release-assets$
 ^_pkgdown\.yml\.bak$
+^cran-comments\.md$
