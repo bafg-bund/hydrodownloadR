@@ -6,7 +6,7 @@ Authors@R: c(
     person("Global Runoff Data Centre", , , "grdc@bafg.de", role = "ctb")
   )
 Description: Provides a unified, extensible interface to discover
-    hydrological stations and download daily time series (e.g., water
+    hydrologic stations and download daily time series (e.g., water
     discharge, water level, water temperature, and several other water
     quality parameter) from national and regional public APIs. Includes a
     provider registry, S3 generics 'stations' and 'timeseries', licensing
@@ -19,7 +19,7 @@ License: MIT + file LICENSE
 URL: https://bafg-bund.github.io/hydrodownloadR/, https://github.com/bafg-bund/hydrodownloadR
 BugReports: https://github.com/bafg-bund/hydrodownloadR/issues
 Depends:
-    R (>= 3.6)
+    R (>= 4.1.0)
 Imports:
     cli,
     dataRetrieval,
