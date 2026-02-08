@@ -160,10 +160,6 @@ maintained via version control and validated with automated checks.
   : SYKE runoff station metadata (area & altitude)
 - [`fr_hubeau_meta`](https://bafg-bund.github.io/hydrodownloadR/reference/fr_hubeau_meta.md)
   : FR_HUBEAU precomputed station metadata
-- [`get_stations()`](https://bafg-bund.github.io/hydrodownloadR/reference/get_stations.md)
-  : Convenience: fetch stations by provider_id
-- [`get_timeseries()`](https://bafg-bund.github.io/hydrodownloadR/reference/get_timeseries.md)
-  : Convenience: fetch time series by provider_id
 - [`hydro_service()`](https://bafg-bund.github.io/hydrodownloadR/reference/hydro_service.md)
   : Create a hydro service object
 - [`hydro_services()`](https://bafg-bund.github.io/hydrodownloadR/reference/hydro_services.md)
