@@ -38,6 +38,12 @@ that rely on consistent, auditable data access and update pipelines.
 
 ## Installation
 
+### CRAN version
+
+``` r
+install.packages("hydrodownloadR")
+```
+
 ### Development version (GitHub)
 
 ``` r
@@ -48,12 +54,6 @@ remotes::install_github("bafg-bund/hydrodownloadR")
 # Option B: pak (fast)
 install.packages("pak")
 pak::pak("bafg-bund/hydrodownloadR")
-```
-
-### CRAN version (planned)
-
-``` r
-install.packages("hydrodownloadR")
 ```
 
 ------------------------------------------------------------------------
