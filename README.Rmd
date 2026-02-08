@@ -54,6 +54,13 @@ data access and update pipelines.
 
 ## Installation
 
+### CRAN version
+
+```{r, eval = FALSE}
+install.packages("hydrodownloadR")
+```
+
+
 ### Development version (GitHub)
 
 ```{r, eval = FALSE}
@@ -64,12 +71,6 @@ remotes::install_github("bafg-bund/hydrodownloadR")
 # Option B: pak (fast)
 install.packages("pak")
 pak::pak("bafg-bund/hydrodownloadR")
-```
-
-### CRAN version (planned)
-
-```{r, eval = FALSE}
-install.packages("hydrodownloadR")
 ```
 
 ------------------------------------------------------------------------
