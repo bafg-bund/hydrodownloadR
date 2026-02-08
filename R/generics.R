@@ -55,22 +55,3 @@ timeseries <- function(x, parameter, stations = NULL,
 #' @export
 timeseries_parameters <- function(x, ...) UseMethod("timeseries_parameters")
 
-#' (Convenience) Get stations by provider_id
-#'
-#' @param provider_id Provider identifier, e.g. "DK_VANDA".
-#' @return A tibble of stations; see [stations()].
-#' @export
-get_stations <- function(provider_id) {
-  stations(hydro_service(provider_id))
-}
-
-#' (Convenience) Get time series by provider_id
-#'
-#' @inheritParams timeseries
-#' @param provider_id Provider identifier, e.g. "DK_VANDA".
-#' @export
-get_timeseries <- function(provider_id, parameter, stations = NULL,
-                           start_date = NULL, end_date = NULL,
-                           mode = c("range","complete"), ...) {
-  timeseries(hydro_service(provider_id), parameter, stations, start_date, end_date, mode, ...)
-}

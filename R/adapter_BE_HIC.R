@@ -305,6 +305,11 @@ timeseries.hydro_service_BE_HIC <- function(x,
   rng       <- resolve_dates(mode, start_date, end_date)
   pm        <- .be_param_map(parameter)
 
+  start_utc <- if (inherits(rng$start, "POSIXt")) rng$start else as.POSIXct(rng$start, tz = "UTC")
+  end_utc   <- if (inherits(rng$end,   "POSIXt")) rng$end   else as.POSIXct(rng$end,   tz = "UTC")
+  end_utc   <- end_utc + 24*3600 - 1  # include the full end day
+
+
   # ---- resolve stations ------------------------------------------------------
   if (is.null(stations) || !length(stations)) {
     st  <- stations.hydro_service_BE_HIC(x)
@@ -331,16 +336,17 @@ timeseries.hydro_service_BE_HIC <- function(x,
     st_id <- st_by_ts[[tsid]] %||% NA_character_
 
     q <- list(
-      service       = "kisters",
-      type          = "queryServices",
-      request       = "getTimeseriesValues",
-      format        = "json",
-      datasource    = 4,
-      ts_id         = tsid,
-      from          = format(rng$start, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
-      to            = format(rng$end,   "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
-      returnfields  = "Timestamp,Value,Quality Code,Quality Code Name,Quality Code Description"
+      service      = "kisters",
+      type         = "queryServices",
+      request      = "getTimeseriesValues",
+      format       = "json",
+      datasource   = 4,
+      ts_id        = tsid,
+      from         = format(start_utc, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+      to           = format(end_utc,   "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+      returnfields = "Timestamp,Value,Quality Code,Quality Code Name,Quality Code Description"
     )
+
 
     req  <- build_request(x, path = "", query = q)
     resp <- .be_perform_with_retry(req)
@@ -376,8 +382,9 @@ timeseries.hydro_service_BE_HIC <- function(x,
     qd_chr  <- if (!is.null(qd)) as.character(qd) else rep(NA_character_, length(ts_posix))
 
     # filter by rng + optional quality exclusion
-    keep <- !is.na(ts_posix) & ts_posix >= rng$start & ts_posix <= (rng$end + 86399)
+    keep <- !is.na(ts_posix) & ts_posix >= start_utc & ts_posix <= end_utc
     if (!is.null(exclude_quality)) keep <- keep & !(qc_chr %in% exclude_quality)
+
     if (!any(keep)) return(.be_empty_ts(x, parameter, pm$unit))
 
     tibble::tibble(

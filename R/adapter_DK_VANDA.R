@@ -213,6 +213,8 @@ timeseries.hydro_service_DK_VANDA <- function(x,
       q <- c(list(stationId = st_id), date_queries)
 
       req  <- build_request(x, path = pm$path, query = q, ...)
+      req  <- httr2::req_options(req, curl_options = list(HTTP_VERSION = 1L))
+      req  <- httr2::req_headers(req, Connection = "close")
       resp <- perform_request(req)
 
       status <- httr2::resp_status(resp)

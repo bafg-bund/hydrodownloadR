@@ -71,7 +71,7 @@ AT_EHYD_META         <- "messstellen_owf.csv"
 
   if (parameter == "water_level") {
     return(list(
-      unit     = "m",
+      unit     = "cm",
       subdir   = AT_EHYD_W_DIR,          # "W-Tagesmittel"
       prefix   = "W-Tagesmittel-",
       param    = "water_level",
@@ -296,6 +296,16 @@ AT_EHYD_META         <- "messstellen_owf.csv"
   )
 }
 
+.as_utf8 <- function(x) {
+  x <- as.character(x)
+  out <- tryCatch(iconv(x, from = "", to = "UTF-8", sub = "byte"),
+                  error = function(e) x)
+  # If iconv returns NA for some, fall back to enc2utf8 (best effort)
+  bad <- is.na(out)
+  if (any(bad)) out[bad] <- enc2utf8(x[bad])
+  out
+}
+
 
 # --- Track stations with no data (per parameter) -----------------------------
 
@@ -386,12 +396,14 @@ AT_EHYD_META         <- "messstellen_owf.csv"
     pattern = paste0("^", pm$prefix, "[0-9]{6}\\.csv$"),
     full.names = TRUE
   )
+  files <- .as_utf8(files)  # normalize paths to UTF-8 for safe regex/basename
+
   if (!length(files)) return(NULL)
 
   rds_path <- .at_param_cache_rds(root, parameter)
 
   # Tell the user this is a one-time build that will be cached
-  if (requireNamespace("cli", quietly = TRUE)) {
+  if (.use_cli()) {
     cli::cli_inform(c(
       "i" = sprintf("Building %s cache (first run only, then reused)...", pm$param),
       " " = sprintf("Target cache file: %s", rds_path)
@@ -404,7 +416,7 @@ AT_EHYD_META         <- "messstellen_owf.csv"
   empty_ids <- character()
   ts_list   <- vector("list", length(files))
 
-  if (requireNamespace("cli", quietly = TRUE)) {
+  if (.use_cli()) {
     # Fancy progress with cli
     pb_id <- cli::cli_progress_bar(
       name   = sprintf("Parsing %s", pm$subdir),
@@ -413,7 +425,8 @@ AT_EHYD_META         <- "messstellen_owf.csv"
     )
     for (i in seq_along(files)) {
       fp  <- files[[i]]
-      sid <- sub(paste0("^", pm$prefix, "([0-9]{6})\\.csv$"), "\\1", basename(fp))
+      bn  <- .as_utf8(basename(files[[i]]))
+      sid <- sub(paste0("^", pm$prefix, "([0-9]{6})\\.csv$"), "\\1", bn)
       ts  <- .at_parse_station_csv(fp, pm)
       if (is.null(ts) || !nrow(ts)) {
         empty_ids <- c(empty_ids, sid)
@@ -452,7 +465,7 @@ AT_EHYD_META         <- "messstellen_owf.csv"
   d <- dplyr::bind_rows(ts_list)
   if (!nrow(d)) {
     # Still inform that the cache is empty but created (with empty-station info)
-    if (requireNamespace("cli", quietly = TRUE)) {
+    if (.use_cli()) {
       cli::cli_inform(c(
         "!" = sprintf("No usable rows found for '%s'. Cache will contain 0 rows.", pm$subdir),
         " " = if (length(empty_ids))
@@ -473,7 +486,7 @@ AT_EHYD_META         <- "messstellen_owf.csv"
 
   saveRDS(d, rds_path)
 
-  if (requireNamespace("cli", quietly = TRUE)) {
+  if (.use_cli()) {
     cli::cli_inform(c(
       "v" = sprintf("Cached %s: %s rows, %s stations.", pm$param,
                     format(nrow(d), big.mark = ","), format(dplyr::n_distinct(d$station_id), big.mark = ",")),
@@ -489,6 +502,20 @@ AT_EHYD_META         <- "messstellen_owf.csv"
   d
 }
 
+.use_cli <- function() {
+  isTRUE(l10n_info()[["UTF-8"]]) && requireNamespace("cli", quietly = TRUE)
+}
+
+.inform <- function(type = "i", msg) {
+  if (.use_cli()) {
+    # type: "i" info, "!" warning, "v" success
+    cli::cli_inform(setNames(list(msg), type))
+  } else {
+    # fall back to base message()
+    prefix <- switch(type, "!" = "WARN:", "v" = "OK:", "i" = "INFO:", "INFO:")
+    message(sprintf("%s %s", prefix, msg))
+  }
+}
 
 
 

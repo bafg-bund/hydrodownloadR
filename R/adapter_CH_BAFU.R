@@ -42,48 +42,62 @@ timeseries_parameters.hydro_service_CH_BAFU <- function(x, ...) {
 
 
 # -- Parameter mapping --------------------------------------------------------
-
 .ch_param_map <- function(parameter) {
   switch(
     parameter,
-    water_discharge = list(path = "/hydro/daterange",
-                           prefer_par = "flow",
-                           fallback_par = "flow_ls",  # l/s -> m3/s
-                           unit = "m^3/s"),
+    water_discharge = list(
+      path = "/hydro/daterange",
+      prefer_par = "flow",
+      fallback_par = "flow_ls",  # l/s -> m^3/s
+      unit = "m^3/s"
+    ),
 
-    water_level     = list(path = "/hydro/daterange",
-                           prefer_par = "height_abs",
-                           fallback_par = "height",
-                           unit = "m"),
+    water_level = list(
+      path = "/hydro/daterange",
+      prefer_par = "height_abs",
+      fallback_par = "height",
+      unit = "m"
+    ),
 
-    water_temperature = list(path = "/hydro/daterange",
-                             prefer_par = "temperature",
-                             fallback_par = NULL,
-                             unit = "degC"),
+    water_temperature = list(
+      path = "/hydro/daterange",
+      prefer_par = "temperature",
+      fallback_par = NULL,
+      unit = "degC"
+    ),
 
-    water_quality_ph = list(path = "/hydro/daterange",
-                            prefer_par = "acidity",
-                            fallback_par = NULL,
-                            unit = "pH"),
+    ph = list(
+      path = "/hydro/daterange",
+      prefer_par = "acidity",
+      fallback_par = NULL,
+      unit = "pH"
+    ),
 
-    water_quality_conductivity = list(path = "/hydro/daterange",
-                                      prefer_par = "conductivity",
-                                      fallback_par = NULL,
-                                      unit = "uS/cm"),
+    conductivity = list(
+      path = "/hydro/daterange",
+      prefer_par = "conductivity",
+      fallback_par = NULL,
+      unit = "uS/cm"
+    ),
 
-    water_quality_oxygen = list(path = "/hydro/daterange",
-                                prefer_par = "oxygen",
-                                fallback_par = NULL,
-                                unit = "mg/l"),
+    oxygen = list(
+      path = "/hydro/daterange",
+      prefer_par = "oxygen",
+      fallback_par = NULL,
+      unit = "mg/l"
+    ),
 
-    water_quality_turbidity = list(path = "/hydro/daterange",
-                                   prefer_par = "turbidity",
-                                   fallback_par = NULL,
-                                   unit = "BSTU"),
+    turbidity = list(
+      path = "/hydro/daterange",
+      prefer_par = "turbidity",
+      fallback_par = NULL,
+      unit = "BSTU"
+    ),
 
     stop("Unsupported parameter for CH_BAFU: ", parameter)
   )
 }
+
 
 
 # -- Helpers -----------------------------------------------------------------

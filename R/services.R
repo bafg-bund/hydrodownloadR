@@ -1,7 +1,13 @@
-#' Create a hydro_service object
+#' Create a hydro service object
+#'
 #' @param provider_id ID as listed by [hydro_services()]
+#' @param ... Reserved for future use.
+#' @return An object of class `"hydro_service"` (a list) containing the provider
+#'   configuration used by [stations()] and [timeseries()] (e.g. provider_id,
+#'   provider_name, country, base_url, and other adapter-specific settings).
 #' @export
-hydro_service <- function(provider_id) {
+
+hydro_service <- function(provider_id, ...) {
   if (missing(provider_id) || length(provider_id) != 1L ||
       is.na(provider_id) || !nzchar(provider_id)) {
     rlang::abort("provider_id is required, e.g. hydro_service('EE_EST').")

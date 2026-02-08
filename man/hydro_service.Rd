@@ -2,13 +2,20 @@
 % Please edit documentation in R/services.R
 \name{hydro_service}
 \alias{hydro_service}
-\title{Create a hydro_service object}
+\title{Create a hydro service object}
 \usage{
-hydro_service(provider_id)
+hydro_service(provider_id, ...)
 }
 \arguments{
 \item{provider_id}{ID as listed by \code{\link[=hydro_services]{hydro_services()}}}
+
+\item{...}{Reserved for future use.}
+}
+\value{
+An object of class \code{"hydro_service"} (a list) containing the provider
+configuration used by \code{\link[=stations]{stations()}} and \code{\link[=timeseries]{timeseries()}} (e.g. provider_id,
+provider_name, country, base_url, and other adapter-specific settings).
 }
 \description{
-Create a hydro_service object
+Create a hydro service object
 }

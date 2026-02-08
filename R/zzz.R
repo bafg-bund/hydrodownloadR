@@ -31,4 +31,5 @@
   register_AR_INA()
   register_CH_BAFU()
   register_BA_AVPS()
+  register_ES_CEDEX()
 }

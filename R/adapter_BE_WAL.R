@@ -183,6 +183,10 @@ timeseries.hydro_service_BE_WAL <- function(x,
   rng       <- resolve_dates(mode, start_date, end_date)
   pm        <- .wal_param_map(parameter)
 
+  start_utc <- if (inherits(rng$start, "POSIXt")) rng$start else as.POSIXct(rng$start, tz = "UTC")
+  end_utc   <- if (inherits(rng$end,   "POSIXt")) rng$end   else as.POSIXct(rng$end,   tz = "UTC")
+  end_utc   <- end_utc + 24*3600 - 1  # include full end day (23:59:59)
+
   # 1) pull stations (for vd_map and default station universe)
   st_all <- stations.hydro_service_BE_WAL(x)
 
@@ -218,10 +222,11 @@ timeseries.hydro_service_BE_WAL <- function(x,
       datasource   = 0,
       format       = "json",
       ts_id        = tsid,
-      from         = format(rng$start, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
-      to           = format(rng$end,   "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+      from         = format(start_utc, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+      to           = format(end_utc,   "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
       returnfields = "Timestamp,Value,Quality Code,Quality Code Name,Quality Code Description"
     )
+
     req  <- build_request(x, path = "", query = q)
     resp <- .wal_perform_with_retry(req)
     resp <- .wal_perform_with_retry(req)
@@ -307,8 +312,9 @@ timeseries.hydro_service_BE_WAL <- function(x,
     qn_chr  <- if (!is.null(qn_col)) as.character(df[[qn_col]]) else rep(NA_character_, length(ts_posix))
     qd_chr  <- if (!is.null(qd_col)) as.character(df[[qd_col]]) else rep(NA_character_, length(ts_posix))
 
-    keep <- !is.na(ts_posix) & ts_posix >= rng$start & ts_posix <= (rng$end + 86399)
+    keep <- !is.na(ts_posix) & ts_posix >= start_utc & ts_posix <= end_utc
     if (!is.null(exclude_quality)) keep <- keep & !(qc_chr %in% exclude_quality)
+
     if (!any(keep)) return(.wal_empty_ts(x, parameter, pm$unit))
 
     # NEW: station-specific vertical datum mapping

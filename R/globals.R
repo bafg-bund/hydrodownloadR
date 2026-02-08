@@ -24,5 +24,13 @@ utils::globalVariables(c(
   "code_site", "altitude_api", "altitude_site", "altitude_station",
   "qf_desc",
   "value_dvr90_unit", "vertical_datum",
-  "depth", "discharge_m3s"
+  "depth", "discharge_m3s",
+  "gr_cuenca_id",
+  "ref_ceh",
+  "station_name", "station_name_ascii",
+  "river", "river_ascii", "river_name",
+  "station_name.x", "station_name.y",
+  "lat.x", "lat.y", "lon.x", "lon.y",
+  "area_km2_rio"
+
 ))

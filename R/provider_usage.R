@@ -37,6 +37,7 @@ provider_usage <- data.frame(
     "CZ_CHMI",     # Czechia - CHMI
     "DK_VANDA",    # Denmark - Danmarks Miljoeportal (VanDa)
     "EE_EST",      # Estonia - (Keskkonnaportaal / Estonian env. data)
+    "ES_CEDEX",    # S
     "ES_ROAN",     # Spain - ROEA / Anuario de Aforos (ROAN)
     "FI_SYKE",     # Finland - SYKE
     "FR_HUBEAU",   # France - Hub'Eau
@@ -71,6 +72,7 @@ provider_usage <- data.frame(
     "CC BY 4.0",                         # CZ_CHMI (Czechia - CHMI)
     "PSI-loven (CC0/CC-BY comparable)",  # DK_VANDA (Denmark - VanDa)
     "CC BY 4.0 (see distribution terms)",# EE_EST (Estonia)
+    "CC BY 4.0",                         # ES_CEDEX
     "CC BY 4.0",                         # ES_ROAN (Spain - ROAN/ROEA)
     "CC BY 4.0",                         # FI_SYKE (Finland - SYKE)
     "CC BY 2.0",                         # FR_HUBEAU (France - Hub'Eau)
@@ -105,6 +107,7 @@ provider_usage <- data.frame(
     "https://data.gov.cz/dataset?iri=https%3A%2F%2Fdata.gov.cz%2Fzdroj%2Fdatov%C3%A9-sady%2F00020699%2F1f615a016fdc24947e6c6d6bbd530508", # CZ_CHMI (Czechia - CHMI)
     "https://miljoeportal.dk/dataansvar/vilkaar-for-brug", # DK_VANDA (Denmark - VanDa)
     "https://keskkonnaportaal.ee/et/avaandmed#Avaandmetejuriidilinealus", # EE_EST (Estonia)
+    "https://datos.gob.es/en/catalogo/e05068001-servicio-de-api-de-datos-del-miteco", # ES_CEDEX
     "https://datos.gob.es/en/catalogo/e05068001-servicio-de-api-de-datos-del-miteco", # ES_ROAN (Spain - ROAN/ROEA)
     "https://www.syke.fi/en-US/Open_information/Open_data/Licence", # FI_SYKE (Finland - SYKE)
     "https://www.etalab.gouv.fr/licence-ouverte-open-licence/", # FR_HUBEAU (France - Hub'Eau)
@@ -139,6 +142,7 @@ provider_usage <- data.frame(
     "public",             # CZ_CHMI (Czechia - CHMI)
     "public",             # DK_VANDA (Denmark - VanDa)
     "public",             # EE_EST (Estonia)
+    "public",             # ES_CEDEX
     "public",             # ES_ROAN (Spain - ROAN/ROEA)
     "public",             # FI_SYKE (Finland - SYKE)
     "public",             # FR_HUBEAU (France - Hub'Eau)
@@ -173,6 +177,7 @@ provider_usage <- data.frame(
     "open",                        # CZ_CHMI (Czechia - CHMI)
     "open_terms",                  # DK_VANDA (Denmark - VanDa)
     "open",                        # EE_EST (Estonia)
+    "open",                        # ES_CEDEX
     "open",                        # ES_ROAN (Spain - ROAN/ROEA)
     "open",                        # FI_SYKE (Finland - SYKE)
     "open",                        # FR_HUBEAU (France - Hub'Eau)
@@ -207,6 +212,7 @@ provider_usage <- data.frame(
     TRUE,  # CZ_CHMI (Czechia - CHMI)
     TRUE,  # DK_VANDA (Denmark - VanDa)
     TRUE,  # EE_EST (Estonia)
+    TRUE,  # ES_CEDEX
     TRUE,  # ES_ROAN (Spain - ROAN/ROEA)
     TRUE,  # FI_SYKE (Finland - SYKE)
     TRUE,  # FR_HUBEAU (France - Hub'Eau)

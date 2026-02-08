@@ -12,6 +12,13 @@ MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
+## Overview
+
+**Acknowledgements.** The repository structure is inspired by Ryan
+Riggs’ **RivRetrieve**. Thanks to **Frederik Kratzert** (co-author of
+the referenced publication) for helpful exchanges and for maintaining
+and porting the RivRetrieve concept to Python in **RivRetrieve-Python**.
+
 **hydrodownloadR** provides a unified, extensible interface for
 discovering hydrological stations and downloading daily time series
 (e.g., water discharge, water level, water temperature, and several

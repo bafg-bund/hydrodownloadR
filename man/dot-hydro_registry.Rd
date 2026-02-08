@@ -5,7 +5,7 @@
 \alias{.hydro_registry}
 \title{Internal registry for available providers}
 \format{
-An object of class \code{environment} of length 30.
+An object of class \code{environment} of length 31.
 }
 \usage{
 .hydro_registry

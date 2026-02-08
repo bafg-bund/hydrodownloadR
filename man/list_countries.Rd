@@ -2,10 +2,14 @@
 % Please edit documentation in R/convenience.R
 \name{list_countries}
 \alias{list_countries}
-\title{Distinct list of countries}
+\title{List available countries}
 \usage{
 list_countries()
 }
+\value{
+A character vector of country codes (e.g. ISO 3166-1 alpha-2) for which
+at least one provider is available.
+}
 \description{
-Distinct list of countries
+List available countries
 }

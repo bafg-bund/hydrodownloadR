@@ -131,13 +131,13 @@ stations.hydro_service_AU_BOM <- function(x, ...) {
 
 # ---- Preferred BOM daily series name by parameter ---------------------------
 .au_preferred_ts_name <- function(parameter) {
-  # NHS/BOM agreement:
-  # - water_level uses 24HR merged daily mean
-  # - others (e.g., water_discharge, water_temperature) use 09HR merged daily mean
-  if (parameter == "water_discharge") {
+  if (parameter %in% c("water_level", "water_discharge")) {
     "DMQaQc.Merged.DailyMean.24HR"
+  } else {
+    "DMQaQc.Merged.DailyMean.09HR"
   }
 }
+
 
 # ---- Timeseries discovery (select exact ts_name) ----------------------------
 .bom_discover_ts <- function(x, station_ids, pm, parameter) {

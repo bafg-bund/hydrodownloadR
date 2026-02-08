@@ -402,18 +402,27 @@ stations.hydro_service_US_USGS_DR <- function(x, stations = NULL, update = FALSE
     }
   }
 
+  # --- SI conversions
+  MI2_TO_KM2 <- 2.58999
+  FT_TO_M    <- 0.3048
+
   # 4) Harmonize output (no HUC; includes state_name)
   out <- tibble::tibble(
     country       = "US",
-    provider_id   = "US_USGS_DR",
+    provider_id   = "US_USGS",
     provider_name = "United States - USGS NWIS (dataRetrieval)",
-    station_id    = as.character(st$station_id),
-    station_name  = as.character(st$station_name),
+    station_id    = as.character(st$site_no),
+    station_name  = as.character(st$station_nm),
     lat           = suppressWarnings(as.numeric(st$lat)),
     lon           = suppressWarnings(as.numeric(st$lon)),
-    area          = suppressWarnings(as.numeric(st$area)),
-    altitude      = suppressWarnings(as.numeric(st$altitude )),
-    state_code      = as.character(st$state_code),
+
+    # USGS drainage_area is in square miles to convert to km2
+    area          = suppressWarnings(as.numeric(st$drain_area_va)) * MI2_TO_KM2,
+
+    # USGS altitude is in feet to convert to meters
+    elevation     = suppressWarnings(as.numeric(st$alt_va)) * FT_TO_M,
+
+    state_cd      = as.character(st$state_code),
     state_name    = as.character(st$state_name)
   )
 
