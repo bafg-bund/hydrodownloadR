@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Hydrologic Station Catalogs and Time Series from Public APIs">
-<meta name="description" content="Provides a unified, extensible interface to discover hydrologic stations and download daily time series (e.g., water discharge, water level, water temperature, and several other water quality parameter) from national and regional public APIs. Includes a provider registry, S3 generics stations and timeseries, licensing metadata, date-range and complete history modes, rate limiting and retries, optional authentication via environment variables, tidy outputs, UTF-8 to ASCII transliteration, and WGS84 coordinates. Designed for reproducible workflows and straightforward addition of new providers.">
-<meta property="og:description" content="Provides a unified, extensible interface to discover hydrologic stations and download daily time series (e.g., water discharge, water level, water temperature, and several other water quality parameter) from national and regional public APIs. Includes a provider registry, S3 generics stations and timeseries, licensing metadata, date-range and complete history modes, rate limiting and retries, optional authentication via environment variables, tidy outputs, UTF-8 to ASCII transliteration, and WGS84 coordinates. Designed for reproducible workflows and straightforward addition of new providers.">
+<meta name="description" content="Provides a unified, extensible interface to discover hydrologic stations and download daily time series (e.g., water discharge, water level, water temperature, and several other water quality parameter) from national and regional public APIs. Includes a provider registry, S3 generics stations and timeseries, licensing metadata, date-range and complete history modes, rate limiting and retries, optional authentication via environment variables, tidy outputs, UTF-8 to ASCII transliteration, and WGS84 coordinates. Designed for reproducible workflows and straightforward addition of new providers. Background and use cases are described in Farber et al. (2025) &lt;doi:10.5194/essd-17-4613-2025&gt; and Farber et al. (2023) &lt;doi:10.57757/IUGG23-2838&gt;.">
+<meta property="og:description" content="Provides a unified, extensible interface to discover hydrologic stations and download daily time series (e.g., water discharge, water level, water temperature, and several other water quality parameter) from national and regional public APIs. Includes a provider registry, S3 generics stations and timeseries, licensing metadata, date-range and complete history modes, rate limiting and retries, optional authentication via environment variables, tidy outputs, UTF-8 to ASCII transliteration, and WGS84 coordinates. Designed for reproducible workflows and straightforward addition of new providers. Background and use cases are described in Farber et al. (2025) &lt;doi:10.5194/essd-17-4613-2025&gt; and Farber et al. (2023) &lt;doi:10.57757/IUGG23-2838&gt;.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">hydrodownloadR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,11 +51,16 @@
 </h1></div>
 <!-- badges: start -->
 
+<div class="section level2">
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h2>
+<p><strong>Acknowledgements.</strong> The repository structure is inspired by Ryan Riggs’ <strong>RivRetrieve</strong>. Thanks to <strong>Frederik Kratzert</strong> (co-author of the referenced publication) for helpful exchanges and for maintaining and porting the RivRetrieve concept to Python in <strong>RivRetrieve-Python</strong>.</p>
 <p><strong>hydrodownloadR</strong> provides a unified, extensible interface for discovering hydrological stations and downloading daily time series (e.g., water discharge, water level, water temperature, and several other water quality parameters) from national/regional public APIs. The package uses a provider registry with identifiers (<code>provider_id</code>, <code>provider_name</code>) and S3 generics <code><a href="reference/stations.html">stations()</a></code> / <code><a href="reference/timeseries.html">timeseries()</a></code>. It supports complete histories (1900-01-01 until today), per-station selection, rate limiting and retries, optional authentication via environment variables, UTF-8 to ASCII normalization, and coordinate transformation to WGS84.</p>
 <blockquote>
 <p>Built for reproducible workflows and straightforward addition of new providers.</p>
 </blockquote>
 <hr>
+</div>
 <div class="section level2">
 <h2 id="why-this-package-exists">Why this package exists<a class="anchor" aria-label="anchor" href="#why-this-package-exists"></a>
 </h2>

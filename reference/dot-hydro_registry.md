@@ -10,4 +10,4 @@ Internal registry for available providers
 
 ## Format
 
-An object of class `environment` of length 30.
+An object of class `environment` of length 31.

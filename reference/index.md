@@ -11,13 +11,13 @@
 - [`get_timeseries()`](https://bafg-bund.github.io/hydrodownloadR/reference/get_timeseries.md)
   : Convenience: fetch time series by provider_id
 - [`hydro_service()`](https://bafg-bund.github.io/hydrodownloadR/reference/hydro_service.md)
-  : Create a hydro_service object
+  : Create a hydro service object
 - [`hydro_services()`](https://bafg-bund.github.io/hydrodownloadR/reference/hydro_services.md)
   : List available providers
 - [`jp_mlit_meta`](https://bafg-bund.github.io/hydrodownloadR/reference/jp_mlit_meta.md)
   : Japan MLIT stations metadata snapshot
 - [`list_countries()`](https://bafg-bund.github.io/hydrodownloadR/reference/list_countries.md)
-  : Distinct list of countries
+  : List available countries
 - [`stations()`](https://bafg-bund.github.io/hydrodownloadR/reference/stations.md)
   : List stations for a provider
 - [`stations(`*`<hydro_service_BR_ANA>`*`)`](https://bafg-bund.github.io/hydrodownloadR/reference/stations.hydro_service_BR_ANA.md)

@@ -1,5 +1,12 @@
 # hydrodownloadR
 
+## Overview
+
+**Acknowledgements.** The repository structure is inspired by Ryan
+Riggs’ **RivRetrieve**. Thanks to **Frederik Kratzert** (co-author of
+the referenced publication) for helpful exchanges and for maintaining
+and porting the RivRetrieve concept to Python in **RivRetrieve-Python**.
+
 **hydrodownloadR** provides a unified, extensible interface for
 discovering hydrological stations and downloading daily time series
 (e.g., water discharge, water level, water temperature, and several
@@ -158,13 +165,13 @@ maintained via version control and validated with automated checks.
 - [`get_timeseries()`](https://bafg-bund.github.io/hydrodownloadR/reference/get_timeseries.md)
   : Convenience: fetch time series by provider_id
 - [`hydro_service()`](https://bafg-bund.github.io/hydrodownloadR/reference/hydro_service.md)
-  : Create a hydro_service object
+  : Create a hydro service object
 - [`hydro_services()`](https://bafg-bund.github.io/hydrodownloadR/reference/hydro_services.md)
   : List available providers
 - [`jp_mlit_meta`](https://bafg-bund.github.io/hydrodownloadR/reference/jp_mlit_meta.md)
   : Japan MLIT stations metadata snapshot
 - [`list_countries()`](https://bafg-bund.github.io/hydrodownloadR/reference/list_countries.md)
-  : Distinct list of countries
+  : List available countries
 - [`stations()`](https://bafg-bund.github.io/hydrodownloadR/reference/stations.md)
   : List stations for a provider
 - [`stations(`*`<hydro_service_BR_ANA>`*`)`](https://bafg-bund.github.io/hydrodownloadR/reference/stations.hydro_service_BR_ANA.md)
