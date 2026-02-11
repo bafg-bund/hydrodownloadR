@@ -14,11 +14,6 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 
 ## Overview
 
-**Acknowledgements.** The repository structure is inspired by Ryan
-Riggs’ **RivRetrieve**. Thanks to **Frederik Kratzert** (co-author of
-the referenced publication) for helpful exchanges and for maintaining
-and porting the RivRetrieve concept to Python in **RivRetrieve-Python**.
-
 **hydrodownloadR** provides a unified, extensible interface for
 discovering hydrological stations and downloading daily time series
 (e.g., water discharge, water level, water temperature, and several
@@ -32,6 +27,14 @@ transformation to WGS84.
 
 > Built for reproducible workflows and straightforward addition of new
 > providers.
+
+**Acknowledgements.** The repository structure is inspired by Ryan
+Riggs’ [**RivRetrieve**](https://github.com/Ryan-Riggs/RivRetrieve).
+Thanks to **Frederik Kratzert** (co-author of [GRDC-Caravan
+paper](doi:10.5194/essd-17-4613-2025)) and **Thiago Nascimento** for
+helpful exchanges and for maintaining and porting the RivRetrieve
+concept to Python in
+[**RivRetrieve-Python**](https://github.com/kratzert/RivRetrieve-Python).
 
 ------------------------------------------------------------------------
 
