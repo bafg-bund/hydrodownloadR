@@ -20,7 +20,7 @@ register_FI_SYKE <- function() {
 timeseries_parameters.hydro_service_FI_SYKE <- function(x, ...) {
   c("water_discharge","water_level",
     "water_temperature","water_temperature_profile",
-    "runoff","water_velocity")
+    "runoff")
 }
 
 
@@ -343,7 +343,7 @@ stations.hydro_service_FI_SYKE <- function(x, ...) {
 #' @export
 timeseries.hydro_service_FI_SYKE <- function(x,
                                              parameter = c("water_discharge","water_level",
-                                                           "water_temperature","water_temperature_profile","runoff","water_velocity"),
+                                                           "water_temperature","water_temperature_profile","runoff"),
                                              stations = NULL,
                                              start_date = NULL, end_date = NULL,
                                              mode = c("complete","range"),

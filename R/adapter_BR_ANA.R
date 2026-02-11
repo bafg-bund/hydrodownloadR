@@ -17,7 +17,7 @@ register_BR_ANA <- function() {
   register_service_usage(
     provider_id   = "BR_ANA",
     provider_name = "Brazil - ANA HidroWeb",
-    country       = "BR",
+    country       = "Brazil",
     base_url      = "https://www.ana.gov.br/hidrowebservice",
     rate_cfg      = list(n = 3, period = 1),
     auth          = list(
