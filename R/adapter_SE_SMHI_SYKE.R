@@ -109,8 +109,11 @@ stations.hydro_service_SE_SMHI <- function(x, ..., include_params = c(1L, 3L, 4L
   alt   <- col_or_null(df, "altitude") %||%
     col_or_null(df, "elevation") %||%
     col_or_null(df, "height") %||% NA_character_
+  alt_num <- as.numeric(alt)
+
   area  <- col_or_null(df, "catchmentSize") %||%
     col_or_null(df, "area") %||% NA_character_
+  area_num <- as.numeric(area)
 
   out <- tibble::tibble(
     country            = x$country,
@@ -123,8 +126,8 @@ stations.hydro_service_SE_SMHI <- function(x, ..., include_params = c(1L, 3L, 4L
     river_ascii        = to_ascii(river),
     lat                = lat,
     lon                = lon,
-    area               = area,
-    altitude           = alt
+    area               = area_num,
+    altitude           = alt_num
   )
 
   # Deduplicate by station_id (keep first)
