@@ -136,7 +136,7 @@ stations.hydro_service_EE_EST <- function(x, ...) {
         river_ascii        = river_ascii,
         lat                = lat,
         lon                = lon,
-        area               = area0,
+        area               = area_num,
         altitude           = altitude_num
       )
     },

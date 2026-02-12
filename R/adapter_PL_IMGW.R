@@ -66,14 +66,29 @@ timeseries_parameters.hydro_service_PL_IMGW <- function(x, ...) {
 .mv_flow_ms  <- function(x) { x <- suppressWarnings(as.numeric(x)); x[x %in% c(99999.999, 999)] <- NA_real_; x }
 .mv_temp_c   <- function(x) { x <- suppressWarnings(as.numeric(x)); x[x == 99.9] <- NA_real_; x }
 
-# Cache location resolver
+# Cache location resolver (shared layout like AT_EHYD)
 .pl_cache_base <- function(cache_dir = NULL) {
-  if (!is.null(cache_dir) && dir.exists(cache_dir)) return(normalizePath(cache_dir, winslash = "/"))
-  # Prefer a user cache dir if available, fall back to tempdir()
-  base <- tryCatch(tools::R_user_dir("hydrodownloadR", which = "cache"), error = function(e) tempdir())
-  if (!dir.exists(base)) dir.create(base, recursive = TRUE, showWarnings = FALSE)
-  base
+  # 1) User override
+  if (is.character(cache_dir) && nzchar(cache_dir)) {
+    dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
+    return(normalizePath(cache_dir, winslash = "/", mustWork = FALSE))
+  }
+
+  # 2) Platform cache root (no appname)
+  root <- tryCatch(rappdirs::user_cache_dir(), error = function(e) NULL)
+  if (is.null(root)) root <- file.path(tempdir(), "hydro_cache_root")
+
+  # 3) Shared base dir for hydrodownloadR
+  base <- file.path(root, "hydrodownloadR")
+  dir.create(base, recursive = TRUE, showWarnings = FALSE)
+
+  # 4) Adapter-specific dir
+  dir <- file.path(base, "PL_IMGW")
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+
+  normalizePath(dir, winslash = "/", mustWork = FALSE)
 }
+
 
 
 # Read + normalize a historical IMGW daily CSV (handles headerless files & 2024 fully-quoted rows)
