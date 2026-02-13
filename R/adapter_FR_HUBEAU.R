@@ -971,9 +971,9 @@ timeseries.hydro_service_FR_HUBEAU <- function(x,
     vdatum  <- if (vd_col %in% names(df)) as.character(df[[vd_col]]) else rep(vd_site, nrow(df))
 
     tibble::tibble(
-      country        = "FR",
-      provider_id    = "FR_HUBEAU",
-      provider_name  = "France - Hub'Eau (Eaufrance) API",
+      country        = x$country,
+      provider_id    = x$provider_id,
+      provider_name  = x$provider_name,
       station_id     = df$code_station %||% st_id,
       parameter      = "water_level",
       timestamp      = df$ts,
@@ -1048,9 +1048,9 @@ timeseries.hydro_service_FR_HUBEAU <- function(x,
     out <- dplyr::distinct(out, .data$ts, .keep_all = TRUE)
 
     tibble::tibble(
-      country        = "FR",
-      provider_id    = "FR_HUBEAU",
-      provider_name  = "France - Hub'Eau (Eaufrance) API",
+      country        = x$country,
+      provider_id    = x$provider_id,
+      provider_name  = x$provider_name,
       station_id     = out$code_station %||% st_id,
       parameter      = "water_discharge",
       timestamp      = out$ts,
@@ -1117,9 +1117,9 @@ timeseries.hydro_service_FR_HUBEAU <- function(x,
     if (!nrow(df)) return(NULL)
 
     tibble::tibble(
-      country        = "FR",
-      provider_id    = "FR_HUBEAU",
-      provider_name  = "France - Hub'Eau (Eaufrance) API",
+      country        = x$country,
+      provider_id    = x$provider_id,
+      provider_name  = x$provider_name,
       station_id     = df$code_station %||% st_id,
       parameter      = "water_temperature",
       timestamp      = df$ts,

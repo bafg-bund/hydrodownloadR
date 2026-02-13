@@ -408,7 +408,7 @@ stations.hydro_service_US_USGS_NWIS <- function(x, stations = NULL, update = FAL
 
   # 4) Harmonize output (no HUC; includes state_name)
   out <- tibble::tibble(
-    country       = "US",
+    country       = x$country,
     provider_id   = "US_USGS",
     provider_name = "United States - USGS NWIS (dataRetrieval)",
     station_id    = as.character(st$station_id),

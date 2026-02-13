@@ -202,7 +202,7 @@ provider_usage <- data.frame(
     TRUE,  # AR_INA (Argentina - INA Alerta5)
     FALSE, # AT_EHYD (Austria - eHYD)
     TRUE,  # AU_BOM (Australia - BoM)
-    TRUE,  # BA_AVPS (Bosnia and Herzegovina)
+    FALSE,  # BA_AVPS (Bosnia and Herzegovina)
     TRUE,  # BE_HIC (Belgium Flanders - HIC)
     FALSE, # BE_WAL (Belgium Wallonia - SPW)
     TRUE,  # BR_ANA (Brazil - ANA)

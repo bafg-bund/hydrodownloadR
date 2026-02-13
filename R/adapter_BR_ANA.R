@@ -423,9 +423,9 @@ if (is.null(.br_ana_state$issued_at)) .br_ana_state$issued_at <- NULL
       Longitude     = dplyr::if_else(Longitude <= -28 & Longitude >= -75, Longitude, NA_real_),
       station_name_ascii = to_ascii(Nome),
       river_ascii        = to_ascii(RioNome),
-      country            = "BR",
-      provider_id        = "BR_ANA",
-      provider_name      = "Brazil - ANA HidroWeb"
+      country            = x$country,
+      provider_id        = x$provider_id,
+      provider_name      = x$provider_name
     ) |>
     dplyr::relocate(country, provider_id, provider_name, .before = Codigo) |>
     dplyr::relocate(RioNome, .after = "Rio Codigo") |>
@@ -438,9 +438,9 @@ if (is.null(.br_ana_state$issued_at)) .br_ana_state$issued_at <- NULL
 
   st_final <- st |>
     dplyr::mutate(
-      country       = x$country       %||% "BR",
-      provider_id   = x$provider_id   %||% "BR_ANA",
-      provider_name = x$provider_name %||% "Brazil - ANA HidroWeb",
+      country       = x$country,
+      provider_id   = x$provider_id,
+      provider_name = x$provider_name,
       code          = as.character(Codigo),
       station_final = trimws(as.character(Nome)),
       river_final   = trimws(as.character(RioNome)),
