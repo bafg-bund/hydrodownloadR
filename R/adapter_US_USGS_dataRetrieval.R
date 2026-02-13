@@ -420,7 +420,7 @@ stations.hydro_service_US_USGS_DR <- function(x, stations = NULL, update = FALSE
     area          = suppressWarnings(as.numeric(st$area)) * MI2_TO_KM2,
 
     # USGS altitude is in feet to convert to meters
-    elevation     = suppressWarnings(as.numeric(st$altitude)) * FT_TO_M,
+    altitude      = suppressWarnings(as.numeric(st$altitude)) * FT_TO_M,
 
     state_cd      = as.character(st$state_code),
     state_name    = as.character(st$state_name)

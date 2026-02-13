@@ -195,7 +195,7 @@ stations.hydro_service_CZ_CHMI <- function(x, ...) {
     lat                = suppressWarnings(as.numeric(df$GEOGR1)),
     lon                = suppressWarnings(as.numeric(df$GEOGR2)),
     area               = suppressWarnings(as.numeric(df$PLO_STA)),
-    elevation          = NA_real_
+    altitude           = NA_real_
   )
 }
 

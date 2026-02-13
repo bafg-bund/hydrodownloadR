@@ -200,7 +200,7 @@ stations.hydro_service_NO_NVE <- function(x, stations = NULL, ...) {
     lat           = suppressWarnings(as.numeric(df$latitude)),
     lon           = suppressWarnings(as.numeric(df$longitude)),
     area          = suppressWarnings(as.numeric(df$drainageBasinArea)),
-    elevation     = suppressWarnings(as.numeric(df$masl))
+    altitude      = suppressWarnings(as.numeric(df$masl))
   )
 
   # optional filter

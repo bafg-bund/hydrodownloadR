@@ -95,6 +95,8 @@ stations.hydro_service_BA_AVPS <- function(x, ...) {
 
   catch_raw <- col_or_null(df, "metadata_CATCHMENT_SIZE")
   area_km2  <- parse_area_km2(catch_raw)  # as in BE_HIC / BE_WAL
+  alt_raw <- col_or_null(df, "metadata_station_elevation")
+  alt_num  <- as.numeric(alt_raw)  # as in BE_HIC / BE_WAL
 
   out <- tibble::tibble(
     country            = x$country,
@@ -108,7 +110,7 @@ stations.hydro_service_BA_AVPS <- function(x, ...) {
     lat                = lat,
     lon                = lon,
     area               = area_km2,
-    source_url         = paste0(x$base_url, "/", .ba_layer_index_path(.ba_catalog_layer_id))
+    altitude           = alt_num
   )
 
   dplyr::filter(out, !is.na(.data$lat), !is.na(.data$lon),

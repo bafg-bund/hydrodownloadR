@@ -556,7 +556,7 @@ stations.hydro_service_AT_EHYD <- function(x, ...) {
   x_east     <- suppressWarnings(as.numeric(gsub(",", ".", as.character(col_or_null(df, "xrkko08")))))
   y_north    <- suppressWarnings(as.numeric(gsub(",", ".", as.character(col_or_null(df, "yhkko09")))))
   area       <- suppressWarnings(as.numeric(gsub(",", ".", as.character(col_or_null(df, "egarea05")))))
-  elev       <- suppressWarnings(as.numeric(gsub(",", ".", as.character(col_or_null(df, "mpua04")))))
+  alt        <- suppressWarnings(as.numeric(gsub(",", ".", as.character(col_or_null(df, "mpua04")))))
 
   # Reproject to WGS84
   wgs <- .at_to_wgs84_coords(x_east, y_north, from_epsg = 31287L)
@@ -573,7 +573,7 @@ stations.hydro_service_AT_EHYD <- function(x, ...) {
     lat                = wgs$lat,
     lon                = wgs$lon,
     area               = area,
-    elevation          = elev
+    altitude           = alt
   )
   out
 }
