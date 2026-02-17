@@ -114,13 +114,6 @@ timeseries_parameters.hydro_service_US_USGS_NWIS <- function(x, ...) {
              full.names = TRUE)
 }
 
-.usgs_latest_snapshot_file <- function() {
-  files <- .usgs_list_snapshots()
-  if (!length(files)) return(NA_character_)
-  dates <- sub("^.*US_USGS_stations_(\\d{4}-\\d{2}-\\d{2})\\.rds$", "\\1", files)
-  files[which.max(as.Date(dates, format = "%Y-%m-%d"))]
-}
-
 .usgs_latest_snapshot_date <- function() {
   files <- .usgs_list_snapshots()
   if (!length(files)) return(NA)
@@ -287,8 +280,9 @@ timeseries_parameters.hydro_service_US_USGS_NWIS <- function(x, ...) {
   parts <- Filter(Negate(is.null), df_list)
   if (!is.null(extra_df)) parts <- c(parts, list(extra_df))
   if (!length(parts)) return(NULL)
+
   out <- if (requireNamespace("purrr", quietly = TRUE)) purrr::list_rbind(parts) else do.call(rbind, parts)
-  dplyr::distinct(out, .data$site_no, .keep_all = TRUE)
+  dplyr::distinct(out, .data$station_id, .keep_all = TRUE)
 }
 
 .usgs_latest_snapshot_file <- function() {
@@ -299,105 +293,68 @@ timeseries_parameters.hydro_service_US_USGS_NWIS <- function(x, ...) {
   files[which.max(as.Date(dates, format = "%Y-%m-%d"))]
 }
 
-# Where a bundled snapshot would live inside the installed package
-.usgs_bundled_snapshot_path <- function() {
-  # Accept either dated or "latest" filenames
-  p1 <- system.file("extdata", "US_USGS_stations_latest.rds.xz", package = utils::packageName())
-  p2 <- system.file("extdata", "US_USGS_stations_latest.rds",    package = utils::packageName())
-  if (nzchar(p1)) return(p1)
-  if (nzchar(p2)) return(p2)
-  # Fall back to first dated file if present
-  all <- list.files(system.file("extdata", package = utils::packageName()),
-                    pattern = "^US_USGS_stations_\\d{4}-\\d{2}-\\d{2}\\.rds(\\.xz)?$",
-                    full.names = TRUE)
-  if (length(all)) all[[which.max(as.numeric(gsub("\\D", "", basename(all))))]] else ""
-}
-
-# Best-effort date extraction from filename (e.g., US_USGS_stations_2025-11-18.rds.xz)
-.usgs_date_from_filename <- function(path) {
-  m <- regmatches(basename(path), regexpr("\\d{4}-\\d{2}-\\d{2}", basename(path)))
-  if (length(m)) as.Date(m) else NA
-}
-
-.usgs_bundled_snapshot_data <- function() {
-  # Try to access the lazy-loaded data object from the package namespace.
-  # Works whether users attach the package or not.
-  obj <- tryCatch(get("us_usgs_stations_meta", envir = asNamespace(utils::packageName())),
-                  error = function(e) NULL)
-  if (is.null(obj)) {
-    # Fallback if the package name differs or in devtools load_all context
-    obj <- tryCatch(get("us_usgs_stations_meta", envir = parent.env(environment())),
-                    error = function(e) NULL)
-  }
-  obj
-}
-
-
 # ------------------------------------------------------------------------------
 # Stations (cache + dated snapshot on first build or update)
 # ------------------------------------------------------------------------------
 #' @export
-stations.hydro_service_US_USGS_NWIS <- function(x, stations = NULL, update = FALSE, ...) {
+stations.hydro_service_US_USGS_NWIS <- function(x, update = FALSE, ...) {
   snapshot_written <- FALSE
   snapshot_date    <- NA
   snapshot_path    <- NA_character_
+  st_source        <- NA_character_
 
-  # 1) Fast path: use the latest on-disk snapshot (if not updating)
+  st <- NULL
+
+  # 1) Default (update = FALSE): use GitHub-bundled compact metadata (cached locally)
   if (!isTRUE(update)) {
+    st <- tryCatch(
+      ensure_usgs_meta(cache_dir = .usgs_cache_dir()),
+      error = function(e) NULL
+    )
+    if (!is.null(st) && nrow(st)) {
+      st_source     <- "github_bundle"
+      snapshot_path <- attr(st, "cache_path", exact = TRUE)
+
+      # optional attribute if you ever add it to the asset
+      sdate <- attr(st, "source_date", exact = TRUE)
+      if (!is.null(sdate) && !is.na(sdate)) snapshot_date <- as.Date(sdate)
+    } else {
+      st <- NULL
+    }
+  }
+
+  # 2) Fallback: if bundle not available, try latest local dated snapshot (still update = FALSE)
+  if (is.null(st) && !isTRUE(update)) {
     latest <- .usgs_latest_snapshot_file()
     if (!is.na(latest) && file.exists(latest)) {
       st <- tryCatch(readRDS(latest), error = function(e) NULL)
       if (!is.null(st) && nrow(st)) {
+        st_source     <- "local_snapshot"
         snapshot_path <- latest
         snapshot_date <- .usgs_latest_snapshot_date()
       } else {
         st <- NULL
       }
-    } else {
-      st <- NULL
-    }
-  } else {
-    st <- NULL
-  }
-
-  # 2) If no snapshot found and not updating, seed from packaged data (.rda)
-  if (is.null(st) && !isTRUE(update)) {
-    seed <- .usgs_bundled_snapshot_data()
-    if (!is.null(seed) && nrow(seed)) {
-      st <- seed
-      sdate <- attr(st, "source_date", exact = TRUE)
-      if (!is.null(sdate) && !is.na(sdate)) {
-        snapshot_path <- .usgs_snapshot_path(as.Date(sdate))
-        if (!file.exists(snapshot_path)) .usgs_save_rds_atomic(st, snapshot_path)
-        snapshot_date <- as.Date(sdate)
-      } else {
-        snapshot_date <- NA
-        snapshot_path <- NA_character_
-      }
-      if (requireNamespace("cli", quietly = TRUE)) {
-        cli::cli_alert_success("Seeded USGS stations from packaged data (data/us_usgs_stations_meta.rda).")
-        if (!is.na(snapshot_date)) cli::cli_alert_info("Snapshot date (packaged): {snapshot_date}.")
-        if (!is.na(snapshot_path)) cli::cli_alert_info("Snapshot: {.path {normalizePath(snapshot_path, mustWork = FALSE)}}")
-        cli::cli_alert_info("Tip: Use update = TRUE to rebuild from the API (may take ~1 hour).")
-      }
     }
   }
 
-  # 3) Build fresh from API when update = TRUE, or when nothing found to seed
+  # 3) Build from API when update = TRUE OR when nothing else could be loaded
   if (is.null(st)) {
     st <- try(.usgs_fetch_sites_by_state(), silent = TRUE)
     if (inherits(st, "try-error") || is.null(st) || !nrow(st)) {
       return(tibble::tibble())
     }
-    st <- dplyr::distinct(st, .data$site_no, .keep_all = TRUE)
 
-    snapshot_path <- .usgs_snapshot_path(Sys.Date())  # only on update/fresh build
+    st <- dplyr::distinct(st, .data$station_id, .keep_all = TRUE)
+
+    snapshot_path <- .usgs_snapshot_path(Sys.Date())
     .usgs_save_rds_atomic(st, snapshot_path)
-    snapshot_date   <- as.Date(Sys.Date())
-    snapshot_written <- TRUE
+    snapshot_date     <- as.Date(Sys.Date())
+    snapshot_written  <- TRUE
+    st_source         <- "api_build"
 
     if (requireNamespace("cli", quietly = TRUE)) {
-      cli::cli_alert_info("USGS stations were freshly built.")
+      cli::cli_alert_info("USGS stations were freshly built from the API.")
       cli::cli_alert_info("Snapshot: {.path {normalizePath(snapshot_path, mustWork = FALSE)}}")
     }
   }
@@ -406,7 +363,24 @@ stations.hydro_service_US_USGS_NWIS <- function(x, stations = NULL, update = FAL
   MI2_TO_KM2 <- 2.58999
   FT_TO_M    <- 0.3048
 
-  # 4) Harmonize output (no HUC; includes state_name)
+  # Bundle already has area in km2; API snapshot has mi2 -> km2
+  area_km2 <- if (identical(st_source, "github_bundle")) {
+    suppressWarnings(as.numeric(st$area))
+  } else {
+    suppressWarnings(as.numeric(st$area)) * MI2_TO_KM2
+  }
+
+  altitude_m <- if ("altitude" %in% names(st)) {
+    if (identical(st_source, "github_bundle")) {
+      suppressWarnings(as.numeric(st$altitude))
+    } else {
+      suppressWarnings(as.numeric(st$altitude)) * FT_TO_M
+    }
+  } else {
+    NA_real_
+  }
+
+  # 4) Harmonize output (bundle has no state fields -> NA)
   out <- tibble::tibble(
     country       = x$country,
     provider_id   = "US_USGS",
@@ -415,36 +389,29 @@ stations.hydro_service_US_USGS_NWIS <- function(x, stations = NULL, update = FAL
     station_name  = as.character(st$station_name),
     lat           = suppressWarnings(as.numeric(st$lat)),
     lon           = suppressWarnings(as.numeric(st$lon)),
-
-    # USGS drainage_area is in square miles to convert to km2
-    area          = suppressWarnings(as.numeric(st$area)) * MI2_TO_KM2,
-
-    # USGS altitude is in feet to convert to meters
-    altitude      = suppressWarnings(as.numeric(st$altitude)) * FT_TO_M,
-
-    state_cd      = as.character(st$state_code),
-    state_name    = as.character(st$state_name)
+    area          = area_km2,
+    altitude      = altitude_m,
+    state_cd      = if ("state_code" %in% names(st)) as.character(st$state_code) else NA_character_,
+    state_name    = if ("state_name" %in% names(st)) as.character(st$state_name) else NA_character_
   )
 
-  if (!is.null(stations)) {
-    ids <- unique(as.character(stations))
-    out <- dplyr::filter(out, .data$station_id %in% ids)
-  }
-
-  # 5) Attach metadata (paths, date, and directory)
+  # 5) Attach metadata
+  attr(out, "stations_source")        <- st_source
   attr(out, "stations_source_date")   <- snapshot_date
   attr(out, "stations_snapshot_path") <- snapshot_path
   attr(out, "stations_store_dir")     <- .usgs_cache_dir()
 
   if (requireNamespace("cli", quietly = TRUE)) {
-    if (!is.na(snapshot_date))  cli::cli_alert_info("USGS stations snapshot date: {snapshot_date}.")
-    if (!is.na(snapshot_path))  cli::cli_alert_info("Snapshot file: {.path {normalizePath(snapshot_path, mustWork = FALSE)}}")
+    cli::cli_alert_info("USGS stations source: {st_source}.")
+    if (!is.na(snapshot_date)) cli::cli_alert_info("Snapshot date: {snapshot_date}.")
+    if (!is.na(snapshot_path)) cli::cli_alert_info("Snapshot/meta file: {.path {normalizePath(snapshot_path, mustWork = FALSE)}}")
     cli::cli_alert_info("Store dir: {.path {normalizePath(.usgs_cache_dir(), mustWork = FALSE)}}")
     if (isTRUE(update) && snapshot_written) cli::cli_alert_success("Wrote new snapshot.")
   }
 
   out
 }
+
 
 
 # ------------------------------------------------------------------------------
