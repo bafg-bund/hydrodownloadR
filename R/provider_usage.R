@@ -16,8 +16,8 @@
   "open_terms",
   "restricted_terms",
   "restricted_no_redistribution",
-  "restricted_non-commercial",
-  "restricted_non-commercial-no-redestribution",
+  "restricted_noncommercial",
+  "restricted_noncommercial_no_redistribution",
   "restricted_internal",
   "unknown"
 )
@@ -169,7 +169,7 @@ provider_usage <- data.frame(
     "open",                        # AU_BOM (Australia - BoM)
     "restricted_no_redistribution",                        # BA_AVPS (Bosnia and Herzegovina)
     "open",                        # BE_HIC (Belgium Flanders - HIC)
-    "restricted_non-commercial-no-redestribution",   # BE_WAL (Belgium Wallonia - SPW)
+    "restricted_noncommercial_no_redistribution",   # BE_WAL (Belgium Wallonia - SPW)
     "open_terms",                  # BR_ANA (Brazil - ANA)
     "open",                        # CA_ECCC (Canada - ECCC)
     "open",                        # CH_BAFU - BAFU
@@ -195,7 +195,7 @@ provider_usage <- data.frame(
     "open",                        # UK_NRFA (UK - NRFA)
     "open_terms",                  # US_USGS_DR (USA - USGS)
     "open_terms",                  # US_USGS_NWIS (USA - USGS NWIS)
-    "restricted_non-commercial"    # ZA_DWS (South Africa - DWS)
+    "restricted_noncommercial"    # ZA_DWS (South Africa - DWS)
   ),
 
   is_open_data = c(

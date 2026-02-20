@@ -18,15 +18,32 @@
 #' @param is_open_data TRUE/FALSE/NA (derived/assigned classification)
 #' @keywords internal
 #' @noRd
+#' @keywords internal
+#' @noRd
 register_service <- function(provider_id, provider_name, country, base_url,
                              geo_base_url = NULL,
                              rate_cfg = list(n = 5, period = 1),
                              auth = list(type = "none"),
-                             license = NULL,
-                             license_link = NULL,
+                             license = NA_character_,
+                             license_link = NA_character_,
                              access_class = "unknown",
                              reuse_class = "unknown",
                              is_open_data = NA) {
+
+  # ---- inject from provider_usage if not explicitly provided ----
+  if ((is.na(license) || identical(access_class, "unknown") || identical(reuse_class, "unknown") || is.na(is_open_data)) &&
+      exists("provider_usage_get", mode = "function", inherits = TRUE)) {
+
+    u <- tryCatch(provider_usage_get(provider_id), error = function(e) NULL)
+
+    if (!is.null(u)) {
+      if (is.na(license))       license       <- u$license
+      if (is.na(license_link))  license_link  <- u$license_link
+      if (identical(access_class, "unknown")) access_class <- u$access_class
+      if (identical(reuse_class,  "unknown")) reuse_class  <- u$reuse_class
+      if (is.na(is_open_data))  is_open_data  <- u$is_open_data
+    }
+  }
 
   .hydro_registry[[provider_id]] <- list(
     provider_id   = provider_id,
@@ -36,12 +53,14 @@ register_service <- function(provider_id, provider_name, country, base_url,
     geo_base_url  = geo_base_url,
     rate_cfg      = rate_cfg,
     auth          = auth,
+
     license       = license,
     license_link  = license_link,
     access_class  = access_class,
     reuse_class   = reuse_class,
     is_open_data  = is_open_data
   )
+
   invisible(TRUE)
 }
 
