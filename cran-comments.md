@@ -1,3 +1,16 @@
+# hydrodownloadR 0.1.3
+
+* add script for US_USGS_XXX that builds compact USGS station metadata bundle for hydrodownloadRdata release asset
+* update USGS metadata cache
+* dynamical country name as in register correction of open_data usage of BA_AVPS
+* change elevation to altitude due to consistency
+* SE SMHI altitude as numeric
+* Consistency in data structure station_id of AR_INA as character
+* Consistency in data structure area of EE_EST as numeric
+* Same caching of PL_IMGW as other adapters
+
+
+
 # hydrodownloadR 0.1.2
 
 * AT water level unit corrected 
@@ -8,8 +21,7 @@
 * CH adding missing water quality parameter
 * DK fix force HTTP/1.1 for timeseries requests
 * US_USGS_XXX unit conversion (area and altitude)
-
-including Spain CEDEX adapter
+* including Spain CEDEX adapter
 
 
 
