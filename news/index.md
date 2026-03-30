@@ -2,6 +2,8 @@
 
 ## hydrodownloadR 0.1.3
 
+CRAN release: 2026-02-25
+
 - add script for US_USGS_XXX that builds compact USGS station metadata
   bundle for hydrodownloadRdata release asset
 - update USGS metadata cache
