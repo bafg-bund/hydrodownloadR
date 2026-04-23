@@ -10,12 +10,11 @@ register_FI_SYKE <- function() {
     provider_id   = "FI_SYKE",
     provider_name = "Finnish Environment Institute (SYKE)",
     country       = "Finland",
-    base_url      = "http://rajapinnat.ymparisto.fi",   # TODO: confirm base
+    base_url      = "https://rajapinnat.ymparisto.fi",   # TODO: confirm base
     rate_cfg      = list(n = 3, period = 1),
     auth          = list(type = "none")
   )
 }
-
 #' @export
 timeseries_parameters.hydro_service_FI_SYKE <- function(x, ...) {
   c("water_discharge","water_level",
@@ -363,7 +362,37 @@ timeseries.hydro_service_FI_SYKE <- function(x,
   all_ids <- if (is.null(stations) || !length(stations)) {
     st <- stations.hydro_service_FI_SYKE(x)
     st$place_id
-  } else stations
+  } else {
+    st <- stations.hydro_service_FI_SYKE(x)
+
+    user_ids <- trimws(as.character(stations))
+
+    # match against place_id directly
+    is_place <- user_ids %in% st$place_id
+
+    # match against national station_id (Nro)
+    is_station <- user_ids %in% st$station_id
+
+    # resolve: keep place_id as-is, map station_id -> place_id
+    resolved_ids <- c(
+      user_ids[is_place],
+      st$place_id[match(user_ids[is_station], st$station_id)]
+    )
+
+    # warn for unknown ids
+    unknown_ids <- user_ids[!(is_place | is_station)]
+    if (length(unknown_ids)) {
+      rlang::warn(
+        paste0(
+          "FI_SYKE: could not match these ids to either place_id or station_id: ",
+          paste(unique(unknown_ids), collapse = ", ")
+        )
+      )
+    }
+
+    unique(resolved_ids)
+  }
+
   all_ids <- unique(trimws(as.character(stats::na.omit(all_ids))))
   if (!length(all_ids)) return(tibble::tibble(
     country=x$country,

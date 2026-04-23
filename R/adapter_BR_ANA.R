@@ -19,7 +19,7 @@ register_BR_ANA <- function() {
     provider_name = "Brazil - ANA HidroWeb",
     country       = "Brazil",
     base_url      = "https://www.ana.gov.br/hidrowebservice",
-    rate_cfg      = list(n = 3, period = 1),
+    rate_cfg      = list(n = 1, period = 5),
     auth          = list(
       type   = "bearer",
       env_id = "ANA_IDENTIFICADOR",
@@ -61,11 +61,6 @@ timeseries_parameters.hydro_service_BR_ANA <- function(x, ...) {
 # Token state & helpers (single implementation)
 # -----------------------------------------------------------------------------
 # persistent in-session state
-if (!exists(".br_ana_state", inherits = FALSE) || !is.environment(.br_ana_state)) {
-  .br_ana_state <- new.env(parent = emptyenv())
-}
-if (is.null(.br_ana_state$token))     .br_ana_state$token     <- NULL
-if (is.null(.br_ana_state$issued_at)) .br_ana_state$issued_at <- NULL
 
 .br_ana_token_stale <- function(max_age = 600) { # 10 minutes
   tok <- .br_ana_state$token
@@ -81,8 +76,31 @@ if (is.null(.br_ana_state$issued_at)) .br_ana_state$issued_at <- NULL
   list(id = trimws(id), pw = trimws(pw))
 }
 
+# persistent in-session state
+if (!exists(".br_ana_state", inherits = FALSE) || !is.environment(.br_ana_state)) {
+  .br_ana_state <- new.env(parent = emptyenv())
+}
+if (is.null(.br_ana_state$token))     .br_ana_state$token     <- NULL
+if (is.null(.br_ana_state$issued_at)) .br_ana_state$issued_at <- NULL
+
+.br_ana_token_stale <- function(max_age = 300) {  # 5 minutes
+  tok <- .br_ana_state$token
+  t0  <- .br_ana_state$issued_at
+  if (is.null(tok) || !nzchar(tok) || is.null(t0)) return(TRUE)
+  (as.numeric(Sys.time()) - as.numeric(t0)) > max_age
+}
+
+.br_ana_creds <- function(...) {
+  dots <- list(...)
+  id <- dots$identificador %||% getOption("ANA_IDENTIFICADOR", NULL) %||% Sys.getenv("ANA_IDENTIFICADOR", "")
+  pw <- dots$senha          %||% getOption("ANA_SENHA",         NULL) %||% Sys.getenv("ANA_SENHA",         "")
+  list(id = trimws(id), pw = trimws(pw))
+}
+
 .br_ana_get_token <- function(x, force = FALSE, ...) {
-  if (!force && !.br_ana_token_stale()) return(.br_ana_state$token)
+  if (!force && !.br_ana_token_stale()) {
+    return(.br_ana_state$token)
+  }
 
   creds <- .br_ana_creds(...)
   if (!nzchar(creds$id) || !nzchar(creds$pw)) {
@@ -93,17 +111,32 @@ if (is.null(.br_ana_state$issued_at)) .br_ana_state$issued_at <- NULL
   }
 
   req <- build_request(
-    x, path = "EstacoesTelemetricas/OAUth/v1",
-    headers = list(Identificador = creds$id, Senha = creds$pw, accept = "*/*")
+    x,
+    path = "EstacoesTelemetricas/OAUth/v1",
+    headers = list(
+      Identificador = creds$id,
+      Senha = creds$pw,
+      accept = "*/*"
+    )
   ) |>
-    httr2::req_error(is_error = function(resp) httr2::resp_status(resp) >= 400) |>
-    httr2::req_timeout(30)
+    httr2::req_timeout(30) |>
+    httr2::req_retry(
+      is_transient = function(resp) {
+        if (inherits(resp, "error")) return(TRUE)
+        st <- httr2::resp_status(resp)
+        st %in% c(408, 429, 500, 502, 503, 504)
+      },
+      max_tries = 4,
+      backoff   = ~ 2 ^ (.x - 1)
+    )
 
   resp <- httr2::req_perform(req)
   js   <- httr2::resp_body_json(resp, simplifyVector = TRUE)
 
   token <- js$items$tokenautenticacao %||% js$token %||% js$access_token
-  if (!nzchar(token)) cli::cli_abort("Auth OK but no token field returned.")
+  if (!nzchar(token)) {
+    cli::cli_abort("Auth OK but no token field returned.")
+  }
 
   .br_ana_state$token     <- token
   .br_ana_state$issued_at <- as.numeric(Sys.time())
@@ -111,52 +144,95 @@ if (is.null(.br_ana_state$issued_at)) .br_ana_state$issued_at <- NULL
 }
 
 # Build an authed request, with retries on transient errors
-.br_ana_authed_request <- function(x, path, query) {
-  invisible(.br_ana_get_token(x))                 # ensure we have a token
-  tok <- .br_ana_state$token
-
-  # diacritic keys built at runtime; ensure UTF-8 names
+.br_ana_authed_request <- function(x, path, query, ...) {
+  tok <- .br_ana_get_token(x, ...)
   names(query) <- enc2utf8(names(query))
 
   build_request(
-    x, path = path, query = query,
+    x,
+    path = path,
+    query = query,
     headers = list(Authorization = paste("Bearer", tok))
   ) |>
     httr2::req_timeout(60) |>
     httr2::req_retry(
       is_transient = function(resp) {
-        # retry network / transient server issues (not 401)
         if (inherits(resp, "error")) return(TRUE)
         st <- httr2::resp_status(resp)
-        st %in% c(408, 429, 500, 502, 503, 504)
+        st %in% c(408, 500, 502, 503, 504)
       },
-      max_tries = 5,
-      backoff   = ~ 1.5 ^ (.x - 1)
+      max_tries = 3,
+      backoff   = ~ 2 ^ (.x - 1)
     )
 }
 
-# Perform and, on 401, refresh token once and retry
-.br_ana_perform_with_refresh <- function(x, path, query) {
-  # First attempt
-  req  <- .br_ana_authed_request(x, path, query)
+.br_ana_perform <- function(req, station_id = NA_character_, date_from = NA_character_, date_to = NA_character_) {
+  resp <- httr2::req_perform(req)
+  st <- httr2::resp_status(resp)
 
-  resp <- try(httr2::req_perform(req), silent = TRUE)
+  if (st == 200) return(resp)
 
-  # If we got a response object, handle 401 explicitly
-  if (!inherits(resp, "try-error")) {
-    if (httr2::resp_status(resp) != 401) return(resp)
-    # 401 with response > refresh and retry once
-    invisible(.br_ana_get_token(x, force = TRUE))
-    req2  <- .br_ana_authed_request(x, path, query)
-    return(httr2::req_perform(req2))
+  if (st == 429) {
+    cli::cli_warn(c(
+      "!" = "ANA returned 429 Too Many Requests.",
+      "i" = "Station: {station_id}; period: {date_from} to {date_to}",
+      "i" = "Backing off for 30 seconds and skipping this slice."
+    ))
+    Sys.sleep(30)
+    return(NULL)
   }
 
-  # If we got an error (e.g., req_error from upstream), try one forced refresh
-  invisible(.br_ana_get_token(x, force = TRUE))
-  req2  <- .br_ana_authed_request(x, path, query)
-  try(httr2::req_perform(req2), silent = FALSE)
+  if (st == 403) {
+    cli::cli_warn(c(
+      "!" = "ANA returned 403 Forbidden.",
+      "i" = "Station: {station_id}; period: {date_from} to {date_to}",
+      "i" = "This may indicate firewall / IPS blocking by ANA. Skipping this slice."
+    ))
+    Sys.sleep(60)
+    return(NULL)
+  }
+
+  if (st == 401) {
+    cli::cli_warn(c(
+      "!" = "ANA returned 401 Unauthorized.",
+      "i" = "Station: {station_id}; period: {date_from} to {date_to}",
+      "i" = "Skipping this slice."
+    ))
+    return(NULL)
+  }
+
+  if (st == 404) return(resp)
+
+  cli::cli_warn(c(
+    "!" = "ANA returned HTTP {st}.",
+    "i" = "Station: {station_id}; period: {date_from} to {date_to}",
+    "i" = "Skipping this slice."
+  ))
+  return(NULL)
 }
 
+# Perform and, on 401, refresh token once and retry
+.br_ana_perform_with_refresh <- function(x, path, query, ...) {
+  req  <- .br_ana_authed_request(x, path, query, ...)
+  resp <- try(httr2::req_perform(req), silent = TRUE)
+
+  if (!inherits(resp, "try-error")) {
+    st <- httr2::resp_status(resp)
+
+    if (st == 401) {
+      invisible(.br_ana_get_token(x, force = TRUE, ...))
+      req2 <- .br_ana_authed_request(x, path, query, ...)
+      return(httr2::req_perform(req2))
+    }
+
+    return(resp)
+  }
+
+  # if the first perform itself errors, do one forced refresh retry
+  invisible(.br_ana_get_token(x, force = TRUE, ...))
+  req2 <- .br_ana_authed_request(x, path, query, ...)
+  httr2::req_perform(req2)
+}
 # -----------------------------------------------------------------------------
 # Cache helpers (stations)
 # -----------------------------------------------------------------------------
@@ -232,23 +308,52 @@ if (is.null(.br_ana_state$issued_at)) .br_ana_state$issued_at <- NULL
 
 .br_read_mdb_table <- function(mdb_path, table) {
   con <- .br_mdb_connect(mdb_path)
+
+  # First try ODBC
   if (!inherits(con, "try-error")) {
     on.exit(try(DBI::dbDisconnect(con), silent = TRUE), add = TRUE)
     return(DBI::dbReadTable(con, table))
   }
-  if (nzchar(Sys.which("mdb-export"))) {
-    out <- file.path(tempdir(), paste0(table, ".csv"))
-    status <- try(system2("mdb-export", c(shQuote(mdb_path), shQuote(table)), stdout = out, stderr = TRUE), silent = TRUE)
-    if (!inherits(status, "try-error") && file.exists(out)) {
-      return(readr::read_csv(out, show_col_types = FALSE, progress = FALSE))
+
+  # Then try mdbtools
+  mdb_export <- Sys.which("mdb-export")
+  if (nzchar(mdb_export)) {
+    txt <- try(
+      system2(
+        mdb_export,
+        args = c(mdb_path, table),
+        stdout = TRUE,
+        stderr = TRUE
+      ),
+      silent = TRUE
+    )
+
+    if (!inherits(txt, "try-error") && length(txt)) {
+      # If mdb-export returned an error text instead of CSV, catch that
+      if (any(grepl("error|not found|unable|failed", txt, ignore.case = TRUE))) {
+        cli::cli_warn(c(
+          "!" = "mdb-export returned a message instead of a readable CSV table.",
+          "i" = "Table: {table}"
+        ))
+      } else {
+        return(
+          readr::read_csv(
+            I(paste(txt, collapse = "\n")),
+            show_col_types = FALSE,
+            progress = FALSE
+          )
+        )
+      }
     }
   }
+
+  # Neither ODBC nor mdbtools worked
   base_msg <- attr(con, "hydro_msg")
   cli::cli_abort(c(
     "x" = sprintf("Could not read table '%s' from MDB.", table),
     if (!is.null(base_msg)) c("!" = base_msg) else NULL,
-    ">" = "Option A: Install Microsoft Access Database Engine (x64).",
-    ">" = "Option B: Install 'mdbtools' for CSV fallback."
+    ">" = "ODBC read failed, and mdb-export fallback also failed.",
+    ">" = "If mdb-export works in the shell, please report this as a package bug with your OS details."
   ))
 }
 
@@ -724,14 +829,19 @@ timeseries.hydro_service_BR_ANA <- function(x,
           .br_ana_key_data_fim()
         )
 
-        # Perform with auto-refresh on 401
-        resp <- try(.br_ana_perform_with_refresh(x, pmap$path, q), silent = TRUE)
-        if (inherits(resp, "try-error")) {
-          # optional: message and continue
-          cli::cli_inform(c("!" = sprintf("ANA slice failed for station %s (%s..%s) - skipping.",
-                                          st_id, format(sl[1]), format(sl[2]))))
-          next
-        }
+        req <- .br_ana_authed_request(x, pmap$path, q, ...)
+        # req <- .br_ana_authed_request(x, pmap$path, q)
+        resp <- try(
+          .br_ana_perform(
+            req,
+            station_id = st_id,
+            date_from  = format(sl[1]),
+            date_to    = format(sl[2])
+          ),
+          silent = TRUE
+        )
+
+        if (inherits(resp, "try-error") || is.null(resp)) next
         if (httr2::resp_status(resp) == 404) next
 
         items <- .items(resp)

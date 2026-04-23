@@ -1,7 +1,7 @@
 # R/adapter_AT_EHYD.R
 # Austria - eHYD (BMLRT) Hydrometric adapter (offline CSV bundle)
 # Surface water bodies daily data:
-#   https://ehyd.gv.at/eHYD/AreaSelection/download?cat=owf&reg=10
+#   https://ehyd.gv.at/services/AreaSelection/download?cat=owf&reg=10
 #
 # Primary path: single ZIP bundle -> cached -> unzipped -> local CSV reads
 # - Detect cached bundle in user cache dir (~/.cache/hydrodownloadR/AT_EHYD)
@@ -22,7 +22,7 @@ register_AT_EHYD <- function() {
     provider_id   = "AT_EHYD",
     provider_name = "eHYD (BMLRT) CSV Bundle",
     country       = "Austria",
-    base_url      = "https://ehyd.gv.at/eHYD/AreaSelection/download?cat=owf&reg=10",
+    base_url      = "https://ehyd.gv.at/services/AreaSelection/download?cat=owf&reg=10",
     rate_cfg      = list(n = 10, period = 1),
     auth          = list(type = "none")
   )
@@ -44,7 +44,7 @@ timeseries_parameters.hydro_service_AT_EHYD <- function(x, ...) {
 # Constants / parameter mapping (private)
 # -----------------------------------------------------------------------------
 
-AT_EHYD_URL          <- "https://ehyd.gv.at/eHYD/AreaSelection/download?cat=owf&reg=10"
+AT_EHYD_URL          <- "https://ehyd.gv.at/services/AreaSelection/download?cat=owf&reg=10"
 AT_EHYD_Q_DIR        <- "Q-Tagesmittel"
 AT_EHYD_W_DIR        <- "W-Tagesmittel"
 AT_EHYD_META         <- "messstellen_owf.csv"
@@ -153,26 +153,37 @@ AT_EHYD_META         <- "messstellen_owf.csv"
 
 .at_ensure_unpacked <- function(force = FALSE) {
   cache_dir <- .at_cache_dir()
-  if (!isTRUE(force) && dir.exists(cache_dir) && length(list.files(cache_dir, recursive = TRUE)) > 0) return(cache_dir)
+
+  if (!isTRUE(force) && dir.exists(cache_dir) && length(list.files(cache_dir, recursive = TRUE)) > 0) {
+    zip_path <- .at_bundle_zip_path(cache_dir)
+
+    age_days <- NA_real_
+    if (file.exists(zip_path)) {
+      info <- file.info(zip_path)
+      age_days <- as.numeric(difftime(Sys.time(), info$mtime, units = "days"))
+    }
+
+    if (!is.na(age_days) && age_days > 90) {
+      .inform("i", "Using cached eHYD bundle.")
+      .inform("i", paste0("Cached file age: ", round(age_days), " days."))
+      .inform("i", "If you want to ensure you are using the latest eHYD release, run:")
+      .inform("i", 'hydrodownloadR:::.at_ensure_unpacked(force = TRUE)')
+    }
+
+    return(cache_dir)
+  }
 
   zip_path <- .at_download_bundle(cache_dir, force = force)
-  cli::cli_inform(c(
-    "i" = "Unzipping eHYD bundle...",
-    " " = paste0("Extracting to: ", cache_dir)
-  ))
+  .inform("i", "Unzipping eHYD bundle...")
+  .inform("i", paste0("Extracting to: ", cache_dir))
   utils::unzip(zip_path, exdir = cache_dir)
 
   if (!dir.exists(cache_dir)) {
-    # In case the archive wraps the cache_dir differently, try to locate it
-    cand <- list.dirs(cache_dir, full.names = TRUE, recursive = FALSE)
-    cand <- cand[grepl(AT_EHYD_ROOT_DIRNAME, basename(cand), fixed = TRUE)]
-    if (length(cand)) root <- cand[[1]]
+    stop("AT_EHYD: unzip succeeded but root folder was not found.")
   }
 
-  if (!dir.exists(cache_dir)) stop("AT_EHYD: unzip succeeded but root folder was not found.")
   cache_dir
 }
-
 # Robust CSV reader using base read.table; preserves umlauts
 .at_read_csv2 <- function(path) {
   # eHYD uses semicolon + decimal comma; encoding is typically Latin-1

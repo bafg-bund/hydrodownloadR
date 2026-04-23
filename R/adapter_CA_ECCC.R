@@ -179,7 +179,22 @@ COLLECTION_DAILY_MEAN     <- "hydrometric-daily-mean"
 
 .ca_ensure_hydat_sqlite <- function(force = FALSE) {
   sqlite <- .ca_hydat_sqlite_path()
-  if (!isTRUE(force) && !is.null(sqlite) && file.exists(sqlite)) return(sqlite)
+
+  if (!isTRUE(force) && !is.null(sqlite) && file.exists(sqlite)) {
+    age_days <- as.numeric(Sys.time() - file.info(sqlite)$mtime, units = "days")
+
+    if (!is.na(age_days) && age_days > 90) {
+      cli::cli_inform(c(
+        "i" = "Using cached HYDAT database.",
+        " " = paste0("Cached file age: ", round(age_days), " days."),
+        " " = "If you want to ensure you are using the latest HYDAT release, run:",
+        " " = "hydrodownloadR:::.ca_ensure_hydat_sqlite(force = TRUE)"
+      ))
+    }
+
+    return(sqlite)
+  }
+
   .ca_download_and_unzip_hydat(force = force)
 }
 
