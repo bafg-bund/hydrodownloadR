@@ -221,7 +221,7 @@ stations.hydro_service_BA_AVPS <- function(x, ...) {
     unit           = character(0),
     quality_code   = character(0),
     quality_name   = character(0),
-    quality_description = character(0),
+    quality_desc   = character(0),
     source_url     = character(0)
   )
 }
@@ -288,7 +288,7 @@ timeseries.hydro_service_BA_AVPS <- function(x,
       unit           = pm$unit,
       quality_code   = NA_character_,
       quality_name   = NA_character_,
-      quality_description = NA_character_,
+      quality_desc   = NA_character_,
       source_url     = hit$url
     )
   }

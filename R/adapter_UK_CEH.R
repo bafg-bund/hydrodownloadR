@@ -287,6 +287,8 @@ timeseries.hydro_service_UK_CEH <- function(x,
       value         = numeric(),
       unit          = character(),
       quality_code  = character(),
+      quality_name  = character(),
+      quality_desc  = character(),
       source_url    = character()
     ))
   }
@@ -398,6 +400,8 @@ timeseries.hydro_service_UK_CEH <- function(x,
       value         = suppressWarnings(as.numeric(ts_df$value)),
       unit          = unit_out,
       quality_code  = ts_df$quality_code %||% NA_character_,
+      quality_name  = NA_character_,
+      quality_desc  = NA_character_,
       source_url    = src_url
     )
   }, rate = ratelimitr::rate(n = x$rate_cfg$n, period = x$rate_cfg$period))

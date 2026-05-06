@@ -865,6 +865,8 @@ timeseries.hydro_service_BR_ANA <- function(x,
               value         = qa$value,
               unit          = qa$unit,
               quality_code  = qa$quality_code,
+              quality_name  = NA_character_,
+              quality_desc  = NA_character_,
               source_url    = paste0(x$base_url, "/", pmap$path)
             )
           }
@@ -884,6 +886,8 @@ timeseries.hydro_service_BR_ANA <- function(x,
             value         = daily$value,
             unit          = pmap$unit,
             quality_code  = daily$quality_code,
+            quality_name  = NA_character_,
+            quality_desc  = NA_character_,
             source_url    = paste0(x$base_url, "/", pmap$path)
           )
           next
@@ -922,6 +926,8 @@ timeseries.hydro_service_BR_ANA <- function(x,
           value         = suppressWarnings(as.numeric(val[keep])),
           unit          = pmap$unit,
           quality_code  = qf[keep],
+          quality_name  = NA_character_,
+          quality_desc  = NA_character_,
           source_url    = paste0(x$base_url, "/", pmap$path)
         )
       }

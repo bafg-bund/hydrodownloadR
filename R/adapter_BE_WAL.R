@@ -163,7 +163,7 @@ stations.hydro_service_BE_WAL <- function(x, ...) {
     vertical_datum = character(0),
     quality_code   = character(0),
     quality_name   = character(0),
-    quality_description = character(0),
+    quality_desc   = character(0),
     source_url     = character(0)
   )
 }
@@ -332,7 +332,7 @@ timeseries.hydro_service_BE_WAL <- function(x,
       vertical_datum = vdatum,
       quality_code   = qc_chr[keep],
       quality_name   = qn_chr[keep],
-      quality_description = qd_chr[keep],
+      quality_desc   = qd_chr[keep],
       source_url     = paste0(
         x$base_url,
         "?service=kisters&type=queryServices&request=getTimeseriesValues",

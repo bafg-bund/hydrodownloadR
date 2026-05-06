@@ -687,10 +687,12 @@ timeseries.hydro_service_AT_EHYD <- function(x,
       parameter     = parameter,
       unit          = pm$unit,
       quality_code  = NA_character_,
-      qf_desc       = NA_character_,
+      quality_name  = NA_character_,
+      quality_desc  = NA_character_,
       source_url    = source_url,
       .before = 1
     ) |>
     dplyr::select(country, provider_id, provider_name, station_id, parameter,
-                  timestamp, value, unit, quality_code, qf_desc, source_url)
+                  timestamp, value, unit, quality_code, quality_name,
+                  quality_desc, source_url)
 }

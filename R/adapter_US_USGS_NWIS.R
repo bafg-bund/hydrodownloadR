@@ -505,7 +505,8 @@ timeseries.hydro_service_US_USGS_NWIS <- function(x,
         value        = numeric(0),
         unit         = character(0),
         quality_code = character(0),
-        qf_desc      = character(0),
+        quality_name = character(0),
+        quality_desc = character(0),
         source_url   = character(0)
       ))
     }
@@ -536,7 +537,8 @@ timeseries.hydro_service_US_USGS_NWIS <- function(x,
       value        = numeric(0),
       unit         = character(0),
       quality_code = character(0),
-      qf_desc      = character(0),
+      quality_name = character(0),
+      quality_desc = character(0),
       source_url   = character(0)
     ))
   }
@@ -561,7 +563,8 @@ timeseries.hydro_service_US_USGS_NWIS <- function(x,
     value         = as.numeric(vals),
     unit          = pm$unit,
     quality_code  = qf,
-    qf_desc       = NA_character_,
+    quality_name  = NA_character_,
+    quality_desc  = NA_character_,
     source_url    = x$base_url
   )
 

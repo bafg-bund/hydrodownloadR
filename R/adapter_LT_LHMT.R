@@ -148,6 +148,8 @@ timeseries.hydro_service_LT_LHMT <- function(x,
       value         = numeric(),
       unit          = character(),
       quality_code  = character(),
+      quality_name  = character(),
+      quality_desc  = character(),
       source_url    = character()
     ))
   }
@@ -243,6 +245,8 @@ timeseries.hydro_service_LT_LHMT <- function(x,
       value         = val[keep],
       unit          = param_unit,
       quality_code  = NA_character_,
+      quality_name  = NA_character_,
+      quality_desc  = NA_character_,
       source_url    = url
     )
   }
@@ -341,6 +345,8 @@ timeseries.hydro_service_LT_LHMT <- function(x,
       value         = numeric(),
       unit          = character(),
       quality_code  = character(),
+      quality_name  = character(),
+      quality_desc  = character(),
       source_url    = character()
     ))
   }

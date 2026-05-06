@@ -259,12 +259,13 @@ timeseries.hydro_service_UK_NRFA <- function(x,
       timestamp     = ts_df$timestamp,
       value         = suppressWarnings(as.numeric(ts_df$value)),
       unit          = pm$unit,
-      quality_code  = ts_df$quality_code %||% NA_character_,
-      qf_desc       = NA_character_,  # fill if/when you map NRFA flags
-      source_url    = src_url,
       value_datum       = as.numeric(NA),
       value_datum_unit  = val_datum_unit_out, # <- single value, no vector warning
-      vertical_datum    = vdatum
+      vertical_datum    = vdatum,
+      quality_code  = ts_df$quality_code %||% NA_character_,
+      quality_name  = NA_character_,  # fill if/when you map NRFA flags
+      quality_desc  = NA_character_,  # fill if/when you map NRFA flags
+      source_url    = src_url
     )
   }, rate = ratelimitr::rate(n = x$rate_cfg$n, period = x$rate_cfg$period))
 

@@ -305,7 +305,8 @@ COLLECTION_DAILY_MEAN     <- "hydrometric-daily-mean"
     value         = numeric(0),
     unit          = character(0),
     quality_code  = character(0),
-    qf_desc       = character(0),
+    quality_name  = NA_character_,
+    quality_desc  = NA_character_,
     source_url    = character(0)
   )
 }
@@ -523,10 +524,13 @@ timeseries.hydro_service_CA_ECCC <- function(x,
       provider_name = x$provider_name,
       parameter     = parameter,
       unit          = pm$unit,
-      qf_desc       = if (is.null(desc_map)) NA_character_ else unname(desc_map[.data$quality_code]),
+      quality_code  = if (is.null(desc_map)) NA_character_ else unname(desc_map[.data$quality_code]),
+      quality_name  = NA_character_,
+      quality_desc  = NA_character_,
       .before = 1
     ) |>
     dplyr::mutate(source_url = source_url) |>
     dplyr::select(country, provider_id, provider_name, station_id, parameter,
-                  timestamp, value, unit, quality_code, qf_desc, source_url)
+                  timestamp, value, unit, quality_code, quality_name,
+                  quality_desc, source_url)
 }

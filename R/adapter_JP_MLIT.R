@@ -433,9 +433,9 @@ timeseries.hydro_service_JP_MLIT <- function(
     value          = numeric(),
     unit           = character(),
     quality_code   = character(),
-    qf_desc        = character(),
-    source_url     = character(),
-    vertical_datum = character()
+    quality_name   = character(),
+    quality_desc   = character(),
+    source_url     = character()
   )
 
   if (!length(ids)) {
@@ -498,10 +498,10 @@ timeseries.hydro_service_JP_MLIT <- function(
         timestamp      = as.POSIXct(df$Date, tz = "UTC"),
         value          = df$Value,
         unit           = pm$unit,
-        quality_code   = NA_character_,
-        qf_desc        = NA_character_,
-        source_url     = src_url,
-        vertical_datum = NA_character_
+        quality_code   = character(),
+        quality_name   = character(),
+        quality_desc   = character(),
+        source_url     = src_url
       )
     },
     rate = ratelimitr::rate(n = x$rate_cfg$n, period = x$rate_cfg$period)

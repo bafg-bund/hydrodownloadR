@@ -299,6 +299,8 @@ timeseries.hydro_service_DK_VANDA <- function(x,
         value         = value_raw,
         unit          = unit_out,
         quality_code  = qf_chr,
+        quality_name  = NA_character_,
+        quality_desc  = NA_character_,
         source_url    = paste0(x$base_url, pm$path)
       )
 
@@ -332,6 +334,8 @@ timeseries.hydro_service_DK_VANDA <- function(x,
             qc <- quality_code[!is.na(quality_code)]
             if (length(qc)) qc[[1]] else NA_character_
           },
+          quality_name     = NA_character_,
+          quality_desc     = NA_character_,
           source_url       = dplyr::first(source_url),
           value_dvr90_unit = if ("value_dvr90_unit" %in% names(base)) dplyr::first(value_dvr90_unit) else NULL,
           vertical_datum   = if ("vertical_datum" %in% names(base)) dplyr::first(vertical_datum) else NULL,
@@ -344,17 +348,19 @@ timeseries.hydro_service_DK_VANDA <- function(x,
       if ("value_dvr90" %in% names(daily)) {
         daily <- daily |>
           dplyr::select(country, provider_id, provider_name, station_id, parameter,
-                        timestamp, value, unit, quality_code, source_url,
-                        value_dvr90, value_dvr90_unit, vertical_datum)
+                        timestamp, value, unit, value_dvr90, value_dvr90_unit,
+                        vertical_datum, quality_code, quality_name,
+                        quality_desc, source_url)
       } else if ("vertical_datum" %in% names(daily)) {
         daily <- daily |>
           dplyr::select(country, provider_id, provider_name, station_id, parameter,
-                        timestamp, value, unit, quality_code, source_url,
-                        vertical_datum)
+                        timestamp, value, unit,vertical_datum, quality_code,
+                        quality_name, quality_desc, source_url)
       } else {
         daily <- daily |>
           dplyr::select(country, provider_id, provider_name, station_id, parameter,
-                        timestamp, value, unit, quality_code, source_url)
+                        timestamp, value, unit, quality_code, quality_name,
+                        quality_desc, source_url)
       }
 
       daily

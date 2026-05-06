@@ -399,51 +399,127 @@ stations.hydro_service_CL_DGA <- function(x, ...) {
 # -----------------------------------------------------------------------------
 
 .cl_cr2_download_q_daily <- function(site) {
-  # site: 8-digit DGA code as character, e.g. "01001002"
+  # site: DGA station code as character, e.g. "09140001"
+  site <- trimws(as.character(site))
 
-  original <- paste0(
+  # Use a dynamic end timestamp instead of the old hard-coded 2021 value.
+  # Add one day to avoid timezone edge cases.
+  end_epoch <- as.integer(as.POSIXct(Sys.Date() + 1, tz = "UTC"))
+
+  options_str <- paste0(
+    "{",
+    "\"variable\":{\"id\":\"qflxDaily\",\"var\":\"caudal\",",
+    "\"intv\":\"daily\",\"season\":\"year\",\"stat\":\"mean\",",
+    "\"minFrac\":80},",
+    "\"time\":{\"start\":-946771200,\"end\":", end_epoch, ",",
+    "\"months\":\"A\\u00f1o completo\"},",
+    "\"anomaly\":{\"enabled\":false,\"type\":\"dif\",\"rank\":\"no\",",
+    "\"start_year\":1980,\"end_year\":2010,\"minFrac\":70},",
+    "\"map\":{\"stat\":\"mean\",\"minFrac\":10,",
+    "\"borderColor\":\"7F7F7F\",\"colorRamp\":\"Jet\",",
+    "\"showNaN\":false,",
+    "\"limits\":{\"range\":[5,95],\"size\":[4,12],\"type\":\"prc\"}},",
+    "\"series\":{\"sites\":[\"", site, "\"],\"start\":null,\"end\":null},",
+    "\"export\":{\"map\":\"Shapefile\",\"series\":\"CSV\",",
+    "\"view\":{\"frame\":\"Vista Actual\",\"map\":\"roadmap\",",
+    "\"clat\":-38.148818103572275,",
+    "\"clon\":-76.04504453124999,",
+    "\"zoom\":5,\"width\":579,\"height\":628}},",
+    "\"action\":[\"export_series\"]",
+    "}"
+  )
+
+  website <- paste0(
     "https://explorador.cr2.cl/request.php?options=",
-    "{%22variable%22:{%22id%22:%22qflxDaily%22,%22var%22:%22caudal%22,",
-    "%22intv%22:%22daily%22,%22season%22:%22year%22,%22stat%22:%22mean%22,",
-    "%22minFrac%22:80},%22time%22:{%22start%22:-946771200,%22end%22:",
-    "1631664000,%22months%22:%22A%C3%B1o%20completo%22},",
-    "%22anomaly%22:{%22enabled%22:false,%22type%22:%22dif%22,",
-    "%22rank%22:%22no%22,%22start_year%22:1980,%22end_year%22:2010,",
-    "%22minFrac%22:70},%22map%22:{%22stat%22:%22mean%22,%22minFrac%22:10,",
-    "%22borderColor%22:%227F7F7F%22,%22colorRamp%22:%22Jet%22,",
-    "%22showNaN%22:false,%22limits%22:{%22range%22:[5,95],",
-    "%22size%22:[4,12],%22type%22:%22prc%22}},%22series%22:{%22sites%22:[%22"
+    utils::URLencode(options_str, reserved = TRUE)
   )
 
-  ending <- paste0(
-    "%22],%22start%22:null,%22end%22:null},%22export%22:{%22map%22:",
-    "%22Shapefile%22,%22series%22:%22CSV%22,%22view%22:{%22frame%22:",
-    "%22Vista%20Actual%22,%22map%22:%22roadmap%22,%22clat%22:-18.0036,",
-    "%22clon%22:-69.6331,%22zoom%22:5,%22width%22:461,%22height%22:2207}},",
-    "%22action%22:[%22export_series%22]}"
-  )
-
-  website <- paste0(original, site, ending)
-
-  # be polite with CR2 server
   Sys.sleep(0.25)
 
-  s <- rvest::session(website)
-  body_txt <- s |>
-    rvest::html_element("body") |>
-    rvest::html_text()
+  # --------------------------------------------------------------------------
+  # 1) Ask CR2 for the temporary CSV URL
+  # --------------------------------------------------------------------------
+  req <- httr2::request(website) |>
+    httr2::req_user_agent(
+      "hydrodownloadR (+https://github.com/bafg-bund/hydrodownloadR)"
+    ) |>
+    httr2::req_timeout(60)
 
-  # Extract CSV URL from the HTML-ish response
-  page <- gsub("(.*)(https://.*)(\"}}})", "\\2", body_txt)
-  page <- as.character(page)
+  resp <- perform_request(req)
+  body_txt <- httr2::resp_body_string(resp)
 
-  outpath <- tempfile(fileext = ".csv")
-  utils::download.file(page, outpath, quiet = TRUE)
+  js <- try(jsonlite::fromJSON(body_txt), silent = TRUE)
+  if (inherits(js, "try-error")) {
+    rlang::warn(paste0(
+      "CL_DGA/CR2: could not parse JSON response for station ", site
+    ))
+    return(tibble::tibble())
+  }
 
-  original_data <- readr::read_delim(outpath, show_col_types = FALSE)
-  names(original_data) <- sub("\\s+", "", names(original_data))
+  if (length(js$errors) > 0) {
+    rlang::warn(paste0(
+      "CL_DGA/CR2: response contains errors for station ", site, ": ",
+      paste(js$errors, collapse = "; ")
+    ))
+    return(tibble::tibble())
+  }
 
-  tibble::as_tibble(original_data)
+  csv_url <- js$export$series$url
+
+  if (is.null(csv_url) || !nzchar(csv_url)) {
+    rlang::warn(paste0(
+      "CL_DGA/CR2: no CSV URL in response for station ", site
+    ))
+    return(tibble::tibble())
+  }
+
+  # --------------------------------------------------------------------------
+  # 2) Read the temporary CSV via httr2, not utils::download.file()
+  # --------------------------------------------------------------------------
+  read_csv_httr2 <- function(url) {
+    tmp <- tempfile(fileext = ".csv")
+
+    req_csv <- httr2::request(url) |>
+      httr2::req_user_agent(
+        "hydrodownloadR (+https://github.com/bafg-bund/hydrodownloadR)"
+      ) |>
+      httr2::req_timeout(60) |>
+      httr2::req_retry(max_tries = 3)
+
+    resp_csv <- perform_request(req_csv)
+    writeBin(httr2::resp_body_raw(resp_csv), tmp)
+
+    out <- readr::read_delim(tmp, show_col_types = FALSE)
+    names(out) <- sub("\\s+", "", names(out))
+
+    tibble::as_tibble(out)
+  }
+
+  out <- try(read_csv_httr2(csv_url), silent = TRUE)
+
+  # Some R/curl setups fail SSL on www.explorador.cr2.cl.
+  # Try the same temporary path without "www.".
+  if (inherits(out, "try-error")) {
+    csv_url2 <- sub(
+      "^https://www\\.explorador\\.cr2\\.cl",
+      "https://explorador.cr2.cl",
+      csv_url
+    )
+
+    if (!identical(csv_url2, csv_url)) {
+      out <- try(read_csv_httr2(csv_url2), silent = TRUE)
+    }
+  }
+
+  if (inherits(out, "try-error")) {
+    rlang::warn(paste0(
+      "CL_DGA/CR2: CSV download failed for station ", site
+    ))
+    return(tibble::tibble())
+  }
+
+  attr(out, "source_url") <- csv_url
+  out
 }
 
 .cl_fetch_q_daily <- function(x,
@@ -503,6 +579,8 @@ stations.hydro_service_CL_DGA <- function(x, ...) {
     value         = value,
     unit          = "m^3/s",
     quality_code  = NA_character_,
+    quality_name  = NA_character_,
+    quality_desc  = NA_character_,
     source_url    = x$base_url
   )
 }

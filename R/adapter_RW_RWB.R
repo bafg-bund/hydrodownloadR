@@ -349,6 +349,8 @@ stations.hydro_service_RW_RWB <- function(x, ...) {
     value         = val_num,
     unit          = pm$unit,
     quality_code  = NA_character_,
+    quality_name  = NA_character_,
+    quality_desc  = NA_character_,
     source_url    = paste0(x$base_url, "/", path)
   )
 }
@@ -423,3 +425,4 @@ timeseries.hydro_service_RW_RWB <- function(x,
 
   dplyr::bind_rows(out)
 }
+

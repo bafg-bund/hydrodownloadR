@@ -392,6 +392,8 @@ stations.hydro_service_SI_ARSO <- function(x, ...) {
     value         = value,
     unit          = unit,
     quality_code  = NA_character_,
+    quality_name  = NA_character_,
+    quality_desc  = NA_character_,
     source_url    = x$base_url
   )
 }

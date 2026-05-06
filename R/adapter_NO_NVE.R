@@ -161,9 +161,8 @@ timeseries_parameters.hydro_service_NO_NVE <- function(x, ...) {
     value           = numeric(),
     unit            = rep(unit, 0),
     quality_code    = character(),
-    qf_desc         = character(),
-    correction_code = character(),
-    cor_desc        = character(),
+    quality_name    = character(),
+    quality_desc    = character(),
     source_url      = character()
   )
 }
@@ -373,9 +372,9 @@ timeseries.hydro_service_NO_NVE <- function(x,
         value           = pm$to_canon(val[keep], raw_unit = NULL),
         unit            = pm$unit,
         quality_code    = if (is.null(qf)) NA_character_ else as.character(qf[keep]),
-        qf_desc         = if (is.null(qf)) NA_character_ else .map_desc(qf[keep], .nve_quality_map),
-        correction_code = if (is.null(cor)) NA_character_ else as.character(cor[keep]),
-        cor_desc        = if (is.null(cor)) NA_character_ else .map_desc(cor[keep], .nve_correction_map),
+        quality_name    = if (is.null(qf)) NA_character_ else .map_desc(qf[keep], .nve_quality_map),
+        quality_desc    = if (is.null(cor)) NA_character_ else paste0(as.character(cor[keep], " ", .map_desc(cor[keep], .nve_correction_map))),
+        # cor_desc        = if (is.null(cor)) NA_character_ else .map_desc(cor[keep], .nve_correction_map),
         source_url      = source_url %||% paste0(x$base_url, "/api/v1/Observations")
       )
     }, rate = ratelimitr::rate(n = x$rate_cfg$n, period = x$rate_cfg$period))

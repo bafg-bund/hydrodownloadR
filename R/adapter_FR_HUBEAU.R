@@ -906,6 +906,8 @@ timeseries.hydro_service_FR_HUBEAU <- function(x,
     value          = double(),
     unit           = unit,
     quality_code   = NA_character_,
+    quality_name  = NA_character_,
+    quality_desc  = NA_character_,
     vertical_datum = NA_character_,
     source_url     = character()
   )
@@ -980,6 +982,8 @@ timeseries.hydro_service_FR_HUBEAU <- function(x,
       value          = pm$convert(df$val),   # mm -> cm
       unit           = pm$unit,              # "cm"
       quality_code   = df$q_fr,              # keep FR label (as agreed)
+      quality_name  = NA_character_,
+      quality_desc  = NA_character_,
       vertical_datum = vdatum,
       source_url     = url_used
     )
@@ -1057,6 +1061,8 @@ timeseries.hydro_service_FR_HUBEAU <- function(x,
       value          = pm$convert(out$val),     # l/s -> m^3/s
       unit           = pm$unit,                 # "m^3/s"
       quality_code   = col_or_null(out, "libelle_qualification"),
+      quality_name  = NA_character_,
+      quality_desc  = NA_character_,
       vertical_datum = NA_character_,
       source_url     = url_used
     )
@@ -1126,6 +1132,8 @@ timeseries.hydro_service_FR_HUBEAU <- function(x,
       value          = pm$convert(df$val),
       unit           = pm$unit,
       quality_code   = df$libelle_qualification,
+      quality_name   = NA_character_,
+      quality_desc   = NA_character_,
       vertical_datum = NA_character_,
       source_url     = url_used
     )

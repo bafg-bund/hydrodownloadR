@@ -294,6 +294,8 @@ timeseries.hydro_service_EE_EST <- function(x,
         value         = suppressWarnings(as.numeric(val_raw[keep])),
         unit          = pm$unit,
         quality_code  = if (is.null(qf_raw)) NA_character_ else as.character(qf_raw[keep]),
+        quality_name  = NA_character_,
+        quality_desc  = NA_character_,
         source_url    = paste0(x$base_url, path)
       )
     }, rate = ratelimitr::rate(n = x$rate_cfg$n, period = x$rate_cfg$period))

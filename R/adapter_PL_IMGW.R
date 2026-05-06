@@ -180,11 +180,13 @@ timeseries_parameters.hydro_service_PL_IMGW <- function(x, ...) {
       `Hydrological year` = suppressWarnings(as.integer(`Hydrological year`)),
       `Month indicator in the hydrological year` = suppressWarnings(as.integer(`Month indicator in the hydrological year`)),
       Day = suppressWarnings(as.integer(Day)),
+
+      # Map hydrological month index (01=Nov … 12=Oct) to calendar month/year
+      .cal_month = ((`Month indicator in the hydrological year` + 9L) %% 12L) + 1L,
+      .cal_year  = dplyr::if_else(.cal_month >= 11L, `Hydrological year` - 1L, `Hydrological year`),
+
       Date = as.Date(
-        sprintf("%04d-%02d-%02d",
-                `Hydrological year`,
-                `Month indicator in the hydrological year`,
-                Day),
+        sprintf("%04d-%02d-%02d", .cal_year, .cal_month, Day),
         format = "%Y-%m-%d"
       )
     ) |>
@@ -192,7 +194,9 @@ timeseries_parameters.hydro_service_PL_IMGW <- function(x, ...) {
       -`Hydrological year`,
       -`Month indicator in the hydrological year`,
       -Day,
-      -`Calendar month`
+      -`Calendar month`,
+      -.cal_month,
+      -.cal_year
     )
 
   # Move Date after "River" (if present)
@@ -529,7 +533,8 @@ stations.hydro_service_PL_IMGW <- function(x, ...) {
     value         = suppressWarnings(as.numeric(vals)),
     unit          = cm$unit,
     quality_code  = NA_character_,
-    qf_desc       = NA_character_,
+    quality_name  = NA_character_,
+    quality_desc  = NA_character_,
     source_url    = as.character(wide$source_url)
   )
 
@@ -636,7 +641,8 @@ timeseries.hydro_service_PL_IMGW <- function(x,
     value        = numeric(),
     unit         = character(),
     quality_code = character(),
-    qf_desc      = character(),
+    quality_name = character(),
+    quality_desc = character(),
     source_url   = character()
   )
 }

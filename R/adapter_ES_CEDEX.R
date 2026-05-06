@@ -562,6 +562,8 @@ stations.hydro_service_ES_CEDEX <- function(x, ..., details = c("meta", "list"))
     value         = res$value,
     unit          = res$unit,
     quality_code  = NA_character_,
+    quality_name  = NA_character_,
+    quality_desc  = NA_character_,
     source_url    = res$source_url
   )
 }
@@ -633,6 +635,8 @@ timeseries.hydro_service_ES_CEDEX <- function(x,
     value         = res$value,
     unit          = res$unit,
     quality_code  = NA_character_,
+    quality_name  = NA_character_,
+    quality_desc  = NA_character_,
     source_url    = res$source_url        # keep per-row year URL (best provenance)
   )
   dplyr::arrange(base, station_id, parameter, timestamp)

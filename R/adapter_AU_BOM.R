@@ -7,7 +7,7 @@ register_AU_BOM <- function() {
     provider_id   = "AU_BOM",
     provider_name = "Bureau of Meteorology",
     country       = "Australia",
-    base_url      = "http://www.bom.gov.au/waterdata/services",
+    base_url      = "https://www.bom.gov.au/waterdata/services",
     rate_cfg      = list(n = 3, period = 1),
     auth          = list(type = "none")
   )
@@ -132,9 +132,10 @@ stations.hydro_service_AU_BOM <- function(x, ...) {
 # ---- Preferred BOM daily series name by parameter ---------------------------
 .au_preferred_ts_name <- function(parameter) {
   if (parameter %in% c("water_level", "water_discharge")) {
-    "DMQaQc.Merged.DailyMean.24HR"
-  } else {
     "DMQaQc.Merged.DailyMean.09HR"
+    # "DMQaQc.Merged.DailyMean.24HR"
+  } else {
+    "DMQaQc.Merged.DailyMean.24HR"
   }
 }
 
@@ -246,7 +247,6 @@ stations.hydro_service_AU_BOM <- function(x, ...) {
 
 
 # stable empty schema
-# stable empty schema
 .au_empty_ts <- function(x, parameter, unit = NA_character_) {
   tibble::tibble(
     country       = character(),
@@ -258,6 +258,8 @@ stations.hydro_service_AU_BOM <- function(x, ...) {
     value         = numeric(),
     unit          = character(),
     quality_code  = character(),
+    quality_name  = character(),
+    quality_desc  = character(),
     source_url    = character()
   )
 }
@@ -318,23 +320,17 @@ timeseries.hydro_service_AU_BOM <- function(x,
 
     st_id <- st_by_ts[[tsid]] %||% NA_character_
 
+
     q <- list(
-      service       = "KISTERS",
-      type          = "queryServices",
-      request       = "getTimeseriesValues",
-      format        = "json",
-      ts_id         = tsid,
-      # ask for quality fields explicitly (now includes Description)
-      returnfields  = "Timestamp,Value,Quality Code,Quality Code Name,Quality Code Description"
+      service      = "KISTERS",
+      type         = "queryServices",
+      request      = "getTimeseriesValues",
+      format       = "json",
+      ts_id        = tsid,
+      returnfields = "Timestamp,Value,Quality Code,Quality Code Name,Quality Code Description",
+      from         = format(rng$start, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+      to           = format(rng$end,   "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
     )
-    # Explicit windows to avoid KiWIS defaulting to "today only"
-    if (identical(mode, "range")) {
-      q$from <- format(rng$start, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
-      q$to   <- format(rng$end,   "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
-    } else { # complete
-      q$from <- "1990-01-01T00:00:00Z"
-      q$to   <- "2024-01-01T00:00:00Z"
-    }
 
     req  <- build_request(x, path = "", query = q)
     resp <- perform_request(req)
@@ -397,7 +393,7 @@ timeseries.hydro_service_AU_BOM <- function(x,
       vertical_datum = dplyr::if_else(parameter == "water_level", "AHD", NA_character_),
       quality_code   = qc_chr[keep],
       quality_name   = qn_chr[keep],
-      quality_description = qd_chr[keep],
+      quality_desc   = qd_chr[keep],
       source_url = paste0(
         x$base_url,
         "?service=KISTERS",

@@ -51,7 +51,7 @@ compact_list <- function(x) {
   hit
 }
 
-.nl_quality_desc <- function(x) {
+.nl_quality_name <- function(x) {
   dplyr::case_when(
     is.na(x) ~ NA_character_,
     x %in% c("Gecontroleerd", "Geverifieerd") ~ "validated",
@@ -259,6 +259,7 @@ timeseries.hydro_service_NL_RWS <- function(x,
       value         = numeric(),
       unit          = character(),
       quality_code  = character(),
+      quality_name  = character(),
       quality_desc  = character(),
       source_url    = character()
     ))
@@ -320,12 +321,11 @@ timeseries.hydro_service_NL_RWS <- function(x,
 
         val <- tryCatch(df$Meetwaarde$Waarde_Numeriek, error = function(e) NULL)
         val <- suppressWarnings(as.numeric(val))
+        qf_num <- tryCatch(df$WaarnemingMetadata$Kwaliteitswaardecode, error = function(e) NULL)
+        quality_code <- if (is.null(qf_num)) NA_character_ else as.character(qf_num)
 
         qf <- tryCatch(df$WaarnemingMetadata$Statuswaarde, error = function(e) NULL)
-        quality_code <- if (is.null(qf)) NA_character_ else as.character(qf)
-
-        qf_num <- tryCatch(df$WaarnemingMetadata$Kwaliteitswaardecode, error = function(e) NULL)
-        quality_num <- if (is.null(qf_num)) NA_character_ else as.character(qf_num)
+        quality_name <- if (is.null(qf)) NA_character_ else as.character(qf)
 
         out <- tibble::tibble(
           country       = x$country,
@@ -337,8 +337,8 @@ timeseries.hydro_service_NL_RWS <- function(x,
           value         = val,
           unit          = pm$unit_out,
           quality_code  = quality_code,
-          quality_desc  = .nl_quality_desc(quality_code),
-          quality_num   = quality_num,
+          quality_name  = quality_name,
+          quality_desc  = .nl_quality_name(quality_name),
           source_url    = paste0(x$base_url, DATA_PATH)
         )
 

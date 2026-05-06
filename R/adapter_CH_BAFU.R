@@ -571,10 +571,13 @@ timeseries.hydro_service_CH_BAFU <- function(x,
           timestamp     = as.POSIXct(.data$date, tz = "UTC"),
           unit          = unit_out,
           quality_code  = NA_character_,
+          quality_name  = NA_character_,
+          quality_desc  = NA_character_,
           source_url    = src_url
         ) |>
         dplyr::select(country, provider_id, provider_name, station_id, parameter,
-                      timestamp, value, unit, quality_code, source_url)
+                      timestamp, value, unit, quality_code, quality_name,
+                      quality_desc, source_url)
     },
     rate = ratelimitr::rate(n = x$rate_cfg$n, period = x$rate_cfg$period)
   )

@@ -319,22 +319,24 @@ timeseries.hydro_service_IE_OPW <- function(x,
         country=character(), provider_id=character(), provider_name=character(),
         station_id=character(), parameter=character(), timestamp=as.POSIXct(character()),
         value=numeric(), unit=character(), value_datum_unit=character(),
-        quality_code=integer(), quality_desc=character(), source_url=character()
+        quality_code=character(), quality_name=character(), quality_desc=character(),
+        source_url=character()
       ))
     } else if (parameter == "water_temperature") {
       return(tibble::tibble(
         country=character(), provider_id=character(), provider_name=character(),
         station_id=character(), parameter=character(), timestamp=as.POSIXct(character()),
         value=numeric(), unit=character(),
-        quality_code=integer(), quality_code_recommended=integer(),
-        quality_desc=character(), source_url=character()
+        quality_code=character(), quality_code_recommended=integer(),
+        quality_name=character(), quality_desc=character(), source_url=character()
       ))
     } else {
       return(tibble::tibble(
         country=character(), provider_id=character(), provider_name=character(),
         station_id=character(), parameter=character(), timestamp=as.POSIXct(character()),
         value=numeric(), unit=character(),
-        quality_code=integer(), quality_desc=character(), source_url=character()
+        quality_code=character(), quality_name=character(), quality_desc=character(),
+        source_url=character()
       ))
     }
   }
@@ -388,7 +390,9 @@ timeseries.hydro_service_IE_OPW <- function(x,
       timestamp     = d$timestamp,
       value         = as.numeric(d$value),
       unit          = pm$unit,
-      quality_code  = suppressWarnings(as.integer(d$quality_code)),
+      quality_code  = suppressWarnings(as.character(d$quality_code)),
+      quality_name  = NA_character_,
+      quality_desc  = NA_character_,
       source_url    = paste0(x$base_url, p_all)
     )
 
@@ -397,7 +401,8 @@ timeseries.hydro_service_IE_OPW <- function(x,
       du <- .ie_get_datum_unit(datum_lu, st_id_stripped)
       out$value_datum_unit <- rep(du, nrow(out))
       out <- out[, c("country","provider_id","provider_name","station_id","parameter",
-                     "timestamp","value","unit","value_datum_unit","quality_code","source_url")]
+                     "timestamp","value","unit","value_datum_unit","quality_code",
+                     "quality_name", "quality_desc", "source_url")]
     }
 
     # Temperature-only: add recommended quality column (do not change raw)
@@ -406,7 +411,8 @@ timeseries.hydro_service_IE_OPW <- function(x,
       # place right after quality_code
       out <- out[, c("country","provider_id","provider_name","station_id","parameter",
                      "timestamp","value","unit",
-                     "quality_code","quality_code_recommended","source_url")]
+                     "quality_code","quality_code_recommended",
+                     "quality_name", "quality_desc", "source_url")]
     }
 
     # Append human-readable quality descriptions (Q/S/TWater)
@@ -431,23 +437,26 @@ timeseries.hydro_service_IE_OPW <- function(x,
         out$quality_desc <- unname(qmap[as.character(out$quality_code)])
       }
 
-      # place quality_desc after quality_code (+ after datum/recommended if present)
+      # place quality_desc after quality_code and quality_name (+ after datum/recommended if present)
       cols <- names(out)
       if ("value_datum_unit" %in% cols && "quality_code_recommended" %in% cols) {
         out <- out[, c("country","provider_id","provider_name","station_id","parameter",
                        "timestamp","value","unit","value_datum_unit",
-                       "quality_code","quality_code_recommended","quality_desc","source_url")]
+                       "quality_code","quality_code_recommended",
+                       "quality_name", "quality_desc","source_url")]
       } else if ("value_datum_unit" %in% cols) {
         out <- out[, c("country","provider_id","provider_name","station_id","parameter",
                        "timestamp","value","unit","value_datum_unit",
-                       "quality_code","quality_desc","source_url")]
+                       "quality_code","quality_name", "quality_desc","source_url")]
       } else if ("quality_code_recommended" %in% cols) {
         out <- out[, c("country","provider_id","provider_name","station_id","parameter",
                        "timestamp","value","unit",
-                       "quality_code","quality_code_recommended","quality_desc","source_url")]
+                       "quality_code","quality_code_recommended",
+                       "quality_name", "quality_desc","source_url")]
       } else {
         out <- out[, c("country","provider_id","provider_name","station_id","parameter",
-                       "timestamp","value","unit","quality_code","quality_desc","source_url")]
+                       "timestamp","value","unit","quality_code","quality_name",
+                       "quality_desc","source_url")]
       }
     }
     out

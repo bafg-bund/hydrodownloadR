@@ -404,6 +404,8 @@ timeseries.hydro_service_FI_SYKE <- function(x,
     value=numeric(),
     unit=character(),
     quality_code=character(),
+    quality_name  = character(),
+    quality_desc  = character(),
     source_url=character()
   ))
 
@@ -508,6 +510,8 @@ timeseries.hydro_service_FI_SYKE <- function(x,
       value         = suppressWarnings(as.numeric(val_raw[keep])),
       unit          = pm$unit,
       quality_code  = if (is.null(qf_raw)) NA_character_ else as.character(qf_raw[keep]),
+      quality_name  = NA_character_,
+      quality_desc  = NA_character_,
       source_url    = paste0(x$base_url, path)
     )
 

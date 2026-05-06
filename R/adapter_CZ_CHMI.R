@@ -74,6 +74,8 @@ timeseries_parameters.hydro_service_CZ_CHMI <- function(x, ...) {
     value         = numeric(),
     unit          = rep(unit, 0),
     quality_code  = character(),
+    quality_name   = character(),
+    quality_desc   = character(),
     source_url    = character()
   )
 }
@@ -356,6 +358,8 @@ timeseries.hydro_service_CZ_CHMI <- function(x,
           value         = pm$to_canon(val_num[keep]),
           unit          = pm$canon,
           quality_code  = NA_character_,
+          quality_name  = NA_character_,
+          quality_desc  = NA_character_,
           source_url    = paste0(x$base_url, path)
         )
 

@@ -497,6 +497,8 @@ stations.hydro_service_ZA_DWS <- function(x, ...) {
     value         = daily$value,
     unit          = unit,
     quality_code  = NA_character_,
+    quality_name  = NA_character_,
+    quality_desc  = NA_character_,
     source_url    = paste0(x$base_url, "/HyData.aspx")
   )
 }

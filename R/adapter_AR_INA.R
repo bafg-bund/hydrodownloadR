@@ -325,7 +325,11 @@ timeseries.hydro_service_AR_INA <- function(x,
       parameter     = parameter,
       timestamp     = ts$time,
       value         = ts$value,
-      unit          = pm$default_unit
+      unit          = pm$default_unit,
+      quality_code  = NA_character_,
+      quality_name  = NA_character_,
+      quality_desc  = NA_character_,
+      source_url    = x$base_url
     )
   })
 }
