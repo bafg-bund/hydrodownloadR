@@ -44,12 +44,14 @@ that rely on consistent, auditable data access and update pipelines.
 ### CRAN version
 
 ``` r
+
 install.packages("hydrodownloadR")
 ```
 
 ### Development version (GitHub)
 
 ``` r
+
 # Option A: remotes
 install.packages("remotes")
 remotes::install_github("bafg-bund/hydrodownloadR")
@@ -66,6 +68,7 @@ pak::pak("bafg-bund/hydrodownloadR")
 List available providers:
 
 ``` r
+
 library(hydrodownloadR)
 
 hs <- hydro_services()
@@ -78,6 +81,7 @@ terms information to help users understand access and reuse conditions.
 Select one provider and list stations:
 
 ``` r
+
 x <- hydro_service(hs$provider_id[1])
 stn <- stations(x)
 stn
@@ -86,12 +90,14 @@ stn
 Check which time series parameters are available for this provider:
 
 ``` r
+
 timeseries_parameters(x)
 ```
 
 Download a daily time series for one station:
 
 ``` r
+
 ts <- timeseries(
   x,
   stations  = stn$station_id[1],
