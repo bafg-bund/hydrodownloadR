@@ -765,11 +765,24 @@ stations.hydro_service_MX_CONAGUA <- function(x, update = FALSE, ...) {
 
   if (is.null(df) || !nrow(df)) return(tibble::tibble())
 
+  # Catalogue structure:
+  # 1 Clave
+  # 2 Nombre de la estación
+  # 3 Latitud
+  # 4 Longitud
+  # 5 Altitud
+  # 6 Estado
+  # 7 Municipio
+  # 8 R.H.
+  # 9 Cuenca
   station_id <- toupper(trimws(as.character(.mx_col_i(df, 1))))
   name       <- trimws(as.character(.mx_col_i(df, 2)))
   lat        <- .mx_num(.mx_col_i(df, 3))
   lon        <- .mx_num(.mx_col_i(df, 4))
   altitude   <- .mx_num(.mx_col_i(df, 5))
+
+  # Keep Cuenca internally, but do not expose it as a separate output column.
+  river0     <- trimws(as.character(.mx_col_i(df, 9)))
 
   keep <- !is.na(station_id) & nzchar(station_id)
 
@@ -780,16 +793,14 @@ stations.hydro_service_MX_CONAGUA <- function(x, update = FALSE, ...) {
     station_id         = station_id[keep],
     station_name       = name[keep],
     station_name_ascii = to_ascii(name[keep]),
-    river              = cuenca[keep],
-    river_ascii        = to_ascii(cuenca[keep]),
+    river              = river0[keep],
+    river_ascii        = to_ascii(river0[keep]),
     lat                = lat[keep],
     lon                = lon[keep],
     area               = NA_real_,
-    altitude           = altitude[keep],
-    source_url         = MX_CONAGUA_META_URL
+    altitude           = altitude[keep]
   )
 }
-
 
 # -----------------------------------------------------------------------------
 # Time series
