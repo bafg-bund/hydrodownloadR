@@ -24,30 +24,40 @@
 
 provider_usage <- data.frame(
   provider_id = c(
+    "AF_USGS_USAID",# Afghanistan - USAID Afghanistan
     "AR_INA",      # Argentina - INA Alerta5
+    # "AR_SNIH",     # Argentina -  Sistema Nacional de Información Hídrica, Argentina
     "AT_EHYD",     # Austria - eHYD (BMLRT)
     "AU_BOM",      # Australia - Bureau of Meteorology
     "BA_AVPS",     # BA_AVPS (Bosnia and Herzegovina)
     "BE_HIC",      # Belgium (Flanders) - HIC KiWIS
     "BE_WAL",      # Belgium (Wallonia) - SPW Hydrometrie KiWIS
+    # "BO_SENAMHI",  # Bolivia - SENAMHI
     "BR_ANA",      # Brazil - ANA HidroWeb / web services
     "CA_ECCC",     # Canada - ECCC / Water Survey (HYDAT etc.)
     "CH_BAFU",     # CH_BAFU - BAFU
+    "CH_BAFU_NAWA",# CH_BAFU_NAWA - BAFU
     "CL_DGA",      # Chile - DGA
+    "CO_IDEAM",    # Colombia - IDEAM
     "CZ_CHMI",     # Czechia - CHMI
     "DK_VANDA",    # Denmark - Danmarks Miljoeportal (VanDa)
     "EE_EST",      # Estonia - (Keskkonnaportaal / Estonian env. data)
-    "ES_CEDEX",    # S
+    "ES_CEDEX",    # Spain - CEDEX
     "ES_ROAN",     # Spain - ROEA / Anuario de Aforos (ROAN)
     "FI_SYKE",     # Finland - SYKE
     "FR_HUBEAU",   # France - Hub'Eau
+    # "ICPDR_DANUBEHIS", # DanubeHIS
     "IE_OPW",      # Ireland - OPW Hydrometric
+    "IL_IWA",      # Israel - Israeli Hydrological Service (IWA)
     "JP_MLIT",     # Japan - MLIT
-    "KR_WAMIS",    # Korea - WAMIS
+    # "KR_WAMIS",    # Korea - WAMIS
     "LT_LHMT",     # Lithuania - LHMT (meteo.lt)
+    "MX_CONAGUA",  # Mexico - Conagua
     "NL_RWS",      # Netherlands - Rijkswaterstaat (waterinfo)
     "NO_NVE",      # Norway - NVE
+    "PE_SENAMHI",  # Peru - SENAMHI
     "PL_IMGW",     # Poland - IMGW
+    "PT_SNIRH",    # Portugal - SNIRH
     "RW_RWB",      # Rwanda - Rwanda Water Board
     "SE_SMHI",     # Sweden - SMHI
     "SI_ARSO",     # Slovenia - ARSO
@@ -59,65 +69,85 @@ provider_usage <- data.frame(
   ),
 
   license = c(
-    "Custom/Terms of Service",           # AR_INA (Argentina - INA Alerta5)
+    "Public Domain (USGS Water Data API)",# AF_USGS_USAID - USGS / USAID Afghanistan
+    "UNKNOWN",           # AR_INA (Argentina - INA Alerta5)
+    # "Custom/Terms of Service",           # Argentina -  Sistema Nacional de Información Hídrica, Argentina
     "Custom/Terms of Service",           # AT_EHYD (Austria - eHYD)
     "CC BY 4.0",                         # AU_BOM (Australia - BoM)
     "Copyright - All rights reserved",   # BA_AVPS (Bosnia and Herzegovina)
     "Custom/Terms of Service",           # BE_HIC (Belgium Flanders - HIC)
     "Custom/Terms of Service",           # BE_WAL (Belgium Wallonia - SPW)
-    "CC BY-ND 3.0",                      # BR_ANA (Brazil - ANA)
+    # "Custom/Terms of Service",         # BO_SENAMHI - SENAMHI
+    "Open Government Licence (Brazil)",  # BR_ANA (Brazil - ANA)
     "Open Government Licence (Canada)",  # CA_ECCC (Canada - ECCC)
     "Custom/Terms of Service",           # CH_BAFU - BAFU
+    "Custom/Terms of Service",           # CH_BAFU_NAWA - BAFU
     "CC BY 4.0",                         # CL_DGA (Chile - DGA)
+    "CC BY-SA 4.0",                      # CO_IDEAM (Colombia - IDEAM)
     "CC BY 4.0",                         # CZ_CHMI (Czechia - CHMI)
     "PSI-loven (CC0/CC-BY comparable)",  # DK_VANDA (Denmark - VanDa)
     "CC BY 4.0 (see distribution terms)",# EE_EST (Estonia)
     "CC BY 4.0",                         # ES_CEDEX
     "CC BY 4.0",                         # ES_ROAN (Spain - ROAN/ROEA)
     "CC BY 4.0",                         # FI_SYKE (Finland - SYKE)
-    "CC BY 2.0",                         # FR_HUBEAU (France - Hub'Eau)
+    "Open Licence 2.0 (Etalab)",                         # FR_HUBEAU (France - Hub'Eau)
+    # "CC BY-NC-SA 4.0",                   # DanubeHIS
     "CC BY 4.0",                         # IE_OPW (Ireland - OPW)
-    "Custom/Terms of use",               # JP_MLIT (Japan - MLIT)
-    "UNKNOWN",                           # KR_WAMIS (Korea - WAMIS)
+    "Custom/Terms of Service",           # IL_IWA (Israel - IWA)
+    "Custom/Terms of Service",           # JP_MLIT (Japan - MLIT)
+    # "UNKNOWN",                           # KR_WAMIS (Korea - WAMIS)
     "CC BY-SA 4.0",                      # LT_LHMT (Lithuania - LHMT)
+    "CC BY 4.0",                         # MX_CONAGUA
     "CC 0",                              # NL_RWS (Netherlands - RWS)
     "NLOD (CC BY 3.0 comparable)",       # NO_NVE (Norway - NVE)
+    "Custom/Terms of Service",           # PE_SENAMHI (Peru - SENAMHI)
     "Custom/Terms of Service",           # PL_IMGW (Poland - IMGW)
+    "Custom/Terms of Service",           # PT_SNIRH (Portugal - SNIRH)
     "Custom/Terms of Service",           # RW_RWB (Rwanda - RWB)
     "CC BY 4.0",                         # SE_SMHI (Sweden - SMHI)
     "Custom/Terms of Service",           # SI_ARSO (Slovenia - ARSO)
     "OGL 3",                             # UK_CEH (UKCEH / EIDC)
-    "OGL 3",                             # UK_NRFA (UK - NRFA)
+    "Custom NRFA Click-Through Licence",                             # UK_NRFA (UK - NRFA)
     "Public Domain (USGS policy)",       # US_USGS_DR (USA - USGS)
     "Public Domain (USGS policy)",       # US_USGS_NWIS (USA - USGS NWIS)
     "UNKNOWN"                            # ZA_DWS (South Africa - DWS)
   ),
 
   license_link = c(
-    "https://snih.hidricosargentina.gob.ar/Terminos.aspx", # AR_INA (Argentina - INA Alerta5)
-    "https://ehyd.gv.at/assets/eHYD/pdf/Messstellen_und_Daten.pdf", # AT_EHYD (Austria - eHYD)
+    "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits", # AF_USGS_USAID - USGS / USAID Afghanistan
+    "", # AR_INA (Argentina - INA Alerta5)
+    # "https://snih.hidricosargentina.gob.ar/Terminos.aspx", # # Argentina -  Sistema Nacional de Información Hídrica, Argentina
+    "https://ehyd.gv.at", # AT_EHYD (Austria - eHYD)
     "https://www.bom.gov.au/copyright", # AU_BOM (Australia - BoM)
     "https://www.voda.ba/vodostaji", # BA_AVPS (Bosnia and Herzegovina)
     "https://hicws.vlaanderen.be", # BE_HIC (Belgium Flanders - HIC)
     "https://hydrometrie.wallonie.be/mentions-legales.html", # BE_WAL (Belgium Wallonia - SPW)
-    "https://www.gov.br/ana/pt-br/assuntos/monitoramento-e-eventos-criticos/monitoramento-hidrologico", # BR_ANA (Brazil - ANA)
+    # "https://sena.senamhi.gob.bo/public/public-stations-info-export", # Bolivia - SENAMHI
+    "https://www.gov.br/ana/pt-br/acesso-a-informacao/dados-abertos", # BR_ANA (Brazil - ANA)
     "https://open.canada.ca/en/open-government-licence-canada", # CA_ECCC (Canada - ECCC)
-    "https://api.existenz.ch/",  # CH_BAFU - BAFU
+    "https://data.bafu.admin.ch/lizenz-und-quelle",  # CH_BAFU - BAFU
+    "https://data.bafu.admin.ch/lizenz-und-quelle",  # CH_BAFU_NAWA - BAFU
     "https://dga.mop.gob.cl/servicios-de-informacion/catastro-publico-de-aguas/", # CL_DGA (Chile - DGA)
+    "https://www.datos.gov.co/Ambiente-y-Desarrollo-Sostenible/Caudales-Medios-Diarios-de-los-R-os-de-Colombia/jxnq-r3i9/about_data", # CO_IDEAM (Colombia - IDEAM)
     "https://data.gov.cz/dataset?iri=https%3A%2F%2Fdata.gov.cz%2Fzdroj%2Fdatov%C3%A9-sady%2F00020699%2F1f615a016fdc24947e6c6d6bbd530508", # CZ_CHMI (Czechia - CHMI)
     "https://miljoeportal.dk/dataansvar/vilkaar-for-brug", # DK_VANDA (Denmark - VanDa)
     "https://keskkonnaportaal.ee/et/avaandmed#Avaandmetejuriidilinealus", # EE_EST (Estonia)
     "https://datos.gob.es/en/catalogo/e05068001-servicio-de-api-de-datos-del-miteco", # ES_CEDEX
     "https://datos.gob.es/en/catalogo/e05068001-servicio-de-api-de-datos-del-miteco", # ES_ROAN (Spain - ROAN/ROEA)
-    "https://www.syke.fi/en-US/Open_information/Open_data/Licence", # FI_SYKE (Finland - SYKE)
+    "www.syke.fi/en/environmental-data/use-license-and-responsibilities", # FI_SYKE (Finland - SYKE)
     "https://www.etalab.gouv.fr/licence-ouverte-open-licence/", # FR_HUBEAU (France - Hub'Eau)
+    # "https://www.danubehis.org/license", # DanubeHIS
     "https://waterlevel.ie/page/api/", # IE_OPW (Ireland - OPW)
-    "https://www.mlit.go.jp/link.html", # JP_MLIT (Japan - MLIT)
-    "https://www.wamis.go.kr/ENG/Overview.do", # KR_WAMIS (Korea - WAMIS)
+    "https://data.gov.il/he/terms-of-use",  # IL_IWA (Israel - IWA)
+    "https://www.mlit.go.jp/caution.html", # JP_MLIT (Japan - MLIT)
+    # "https://www.wamis.go.kr/ENG/Overview.do", # KR_WAMIS (Korea - WAMIS)
     "https://api.meteo.lt/", # LT_LHMT (Lithuania - LHMT)
+    "https://www.datos.gob.mx/dataset/estaciones_sistema_informacion_hidrologica", # MX_CONAGUA
     "https://waterinfo-extra.rws.nl/monitoring/gebruik-data/", # NL_RWS (Netherlands - RWS)
     "https://hydapi.nve.no/UserDocumentation/#license", # NO_NVE (Norway - NVE)
+    "https://www.senamhi.gob.pe/?p=terminos-condiciones", # PE_SENAMHI (Peru - SENAMHI)
     "https://danepubliczne.imgw.pl/pl/regulations", # PL_IMGW (Poland - IMGW)
+    "https://snirh.apambiente.pt/", # PT_SNIRH (Portugal - SNIRH)
     "https://waterportal.rwb.rw/about_us", # RW_RWB (Rwanda - RWB)
     "https://www.smhi.se/data/om-smhis-data/villkor-for-anvandning", # SE_SMHI (Sweden - SMHI)
     "https://vode.arso.gov.si/hidarhiv/pov_arhiv_tab.php", # SI_ARSO (Slovenia - ARSO)
@@ -129,16 +159,21 @@ provider_usage <- data.frame(
   ),
 
   access_class = c(
+    "public",# AF_USGS_USAID - USGS / USAID Afghanistan
     "public_clickthrough",             # AR_INA (Argentina - INA Alerta5)
+    # "public_clickthrough",             # Argentina -  Sistema Nacional de Información Hídrica, Argentina
     "offline_bundle",     # AT_EHYD (Austria - eHYD)
     "public",             # AU_BOM (Australia - BoM)
     "public",             # BA_AVPS (Bosnia and Herzegovina)
     "public",             # BE_HIC (Belgium Flanders - HIC)
     "public",             # BE_WAL (Belgium Wallonia - SPW)
+    # "public_clickthrough",# BO_SENAMHI - SENAMHI
     "api_key",            # BR_ANA (Brazil - ANA)
     "public",             # CA_ECCC (Canada - ECCC)
     "public",             # CH_BAFU - BAFU
+    "public",             # CH_BAFU_NAWA - BAFU
     "public",             # CL_DGA (Chile - DGA)
+    "public",             # CO_IDEAM (Colombia - IDEAM)
     "public",             # CZ_CHMI (Czechia - CHMI)
     "public",             # DK_VANDA (Denmark - VanDa)
     "public",             # EE_EST (Estonia)
@@ -146,34 +181,44 @@ provider_usage <- data.frame(
     "public",             # ES_ROAN (Spain - ROAN/ROEA)
     "public",             # FI_SYKE (Finland - SYKE)
     "public",             # FR_HUBEAU (France - Hub'Eau)
+    # "by_request",         # DanubeHIS
     "public",             # IE_OPW (Ireland - OPW)
+    "public",             # IL_IWA (Israel - IWA)
     "public_clickthrough",# JP_MLIT (Japan - MLIT)
-    "public",             # KR_WAMIS (Korea - WAMIS)
+    # "public",             # KR_WAMIS (Korea - WAMIS)
     "public",             # LT_LHMT (Lithuania - LHMT)
+    "public",             # MX_CONAGUA
     "public",             # NL_RWS (Netherlands - RWS)
-    "api_key",             # NO_NVE (Norway - NVE)
+    "api_key",            # NO_NVE (Norway - NVE)
+    "public",             # PE_SENAMHI (Peru - SENAMHI)
     "public_clickthrough",# PL_IMGW (Poland - IMGW)
+    "public_clickthrough",# PT_SNIRH (Portugal - SNIRH)
     "public_clickthrough",# RW_RWB (Rwanda - RWB)
     "public",             # SE_SMHI (Sweden - SMHI)
     "public_clickthrough",# SI_ARSO (Slovenia - ARSO)
     "public",             # UK_CEH (UKCEH / EIDC)
     "public",             # UK_NRFA (UK - NRFA)
-    "api_key",             # US_USGS_DR (USA - USGS)
-    "api_key",             # US_USGS_NWIS (USA - USGS NWIS)
-    "public"          # ZA_DWS (South Africa - DWS)
+    "public",            # US_USGS_DR (USA - USGS)
+    "public",            # US_USGS_NWIS (USA - USGS NWIS)
+    "public"              # ZA_DWS (South Africa - DWS)
   ),
 
   reuse_class = c(
-    "open",                        # AR_INA (Argentina - INA Alerta5)
-    "restricted_internal",         # AT_EHYD (Austria - eHYD)
+    "open",                        # AF_USGS_USAID - USGS / USAID Afghanistan
+    "unknown",                     # AR_INA (Argentina - INA Alerta5)
+    # "open",                        # Argentina -  Sistema Nacional de Información Hídrica, Argentina
+    "restricted_terms",            # AT_EHYD (Austria - eHYD)
     "open",                        # AU_BOM (Australia - BoM)
-    "restricted_no_redistribution",                        # BA_AVPS (Bosnia and Herzegovina)
+    "restricted_no_redistribution",# BA_AVPS (Bosnia and Herzegovina)
     "open",                        # BE_HIC (Belgium Flanders - HIC)
     "restricted_noncommercial_no_redistribution",   # BE_WAL (Belgium Wallonia - SPW)
+    # "restricted_noncommercial",    # BO_SENAMHI - SENAMHI
     "open_terms",                  # BR_ANA (Brazil - ANA)
     "open",                        # CA_ECCC (Canada - ECCC)
-    "open",                        # CH_BAFU - BAFU
+    "open_terms",                  # CH_BAFU - BAFU
+    "open_terms",                  # CH_BAFU_NAWA - BAFU
     "open",                        # CL_DGA (Chile - DGA)
+    "open_terms",                  # CO_IDEAM (Colombia - IDEAM)
     "open",                        # CZ_CHMI (Czechia - CHMI)
     "open_terms",                  # DK_VANDA (Denmark - VanDa)
     "open",                        # EE_EST (Estonia)
@@ -181,34 +226,44 @@ provider_usage <- data.frame(
     "open",                        # ES_ROAN (Spain - ROAN/ROEA)
     "open",                        # FI_SYKE (Finland - SYKE)
     "open",                        # FR_HUBEAU (France - Hub'Eau)
+    # "restricted_noncommercial",    # Danubehis
     "open",                        # IE_OPW (Ireland - OPW)
+    "open_terms",                  # IL_IWA (Israel - IWA)
     "open_terms",                  # JP_MLIT (Japan - MLIT)
-    "unknown",                     # KR_WAMIS (Korea - WAMIS)
+    # "unknown",                     # KR_WAMIS (Korea - WAMIS)
     "open",                        # LT_LHMT (Lithuania - LHMT)
+    "open",                        # MX_CONAGUA
     "open",                        # NL_RWS (Netherlands - RWS)
     "open",                        # NO_NVE (Norway - NVE)
+    "restricted_terms",            # PE_SENAMHI (Peru - SENAMHI)
     "restricted_terms",            # PL_IMGW (Poland - IMGW)
+    "open",                        # PT_SNIRH (Portugal - SNIRH)
     "open",                        # RW_RWB (Rwanda - RWB)
     "open",                        # SE_SMHI (Sweden - SMHI)
     "open_terms",                  # SI_ARSO (Slovenia - ARSO)
     "open",                        # UK_CEH (UKCEH / EIDC)
-    "open",                        # UK_NRFA (UK - NRFA)
+    "restricted_no_redistribution",# UK_NRFA (UK - NRFA)
     "open_terms",                  # US_USGS_DR (USA - USGS)
     "open_terms",                  # US_USGS_NWIS (USA - USGS NWIS)
-    "restricted_noncommercial"    # ZA_DWS (South Africa - DWS)
+    "restricted_noncommercial"     # ZA_DWS (South Africa - DWS)
   ),
 
   is_open_data = c(
-    TRUE,  # AR_INA (Argentina - INA Alerta5)
+    TRUE,  # AF_USGS_USAID - USGS / USAID Afghanistan
+    NA,  # AR_INA (Argentina - INA Alerta5)
+    # TRUE,  # Argentina -  Sistema Nacional de Información Hídrica, Argentina
     FALSE, # AT_EHYD (Austria - eHYD)
     TRUE,  # AU_BOM (Australia - BoM)
-    FALSE,  # BA_AVPS (Bosnia and Herzegovina)
+    FALSE, # BA_AVPS (Bosnia and Herzegovina)
     TRUE,  # BE_HIC (Belgium Flanders - HIC)
     FALSE, # BE_WAL (Belgium Wallonia - SPW)
+    # FALSE, # BO_SENAMHI - SENAMHI
     TRUE,  # BR_ANA (Brazil - ANA)
     TRUE,  # CA_ECCC (Canada - ECCC)
     TRUE,  # CH_BAFU - BAFU
+    TRUE,  # CH_BAFU_NAWA - BAFU
     TRUE,  # CL_DGA (Chile - DGA)
+    TRUE,  # CO_IDEAM (Colombia - IDEAM)
     TRUE,  # CZ_CHMI (Czechia - CHMI)
     TRUE,  # DK_VANDA (Denmark - VanDa)
     TRUE,  # EE_EST (Estonia)
@@ -216,18 +271,23 @@ provider_usage <- data.frame(
     TRUE,  # ES_ROAN (Spain - ROAN/ROEA)
     TRUE,  # FI_SYKE (Finland - SYKE)
     TRUE,  # FR_HUBEAU (France - Hub'Eau)
+    # NA,    # DanubeHIS
     TRUE,  # IE_OPW (Ireland - OPW)
+    TRUE,  # IL_IWA (Israel - IWA)
     TRUE,  # JP_MLIT (Japan - MLIT)
-    NA,    # KR_WAMIS (Korea - WAMIS)
+    # NA,    # KR_WAMIS (Korea - WAMIS)
     TRUE,  # LT_LHMT (Lithuania - LHMT)
+    TRUE,  # MX_CONAGUA
     TRUE,  # NL_RWS (Netherlands - RWS)
     TRUE,  # NO_NVE (Norway - NVE)
+    TRUE,  # PE_SENAMHI (Peru - SENAMHI)
     FALSE, # PL_IMGW (Poland - IMGW)
+    TRUE,  # PT_SNIRH (Portugal - SNIRH)
     TRUE,  # RW_RWB (Rwanda - RWB)
     TRUE,  # SE_SMHI (Sweden - SMHI)
     TRUE,  # SI_ARSO (Slovenia - ARSO)
     TRUE,  # UK_CEH (UKCEH / EIDC)
-    TRUE,  # UK_NRFA (UK - NRFA)
+    FALSE,  # UK_NRFA (UK - NRFA)
     TRUE,  # US_USGS_DR (USA - USGS)
     TRUE,  # US_USGS_NWIS (USA - USGS NWIS)
     FALSE  # ZA_DWS (South Africa - DWS)
