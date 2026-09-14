@@ -1,6 +1,9 @@
 # Japan MLIT stations metadata snapshot
 
-A tibble used by the JP MLIT adapter to speed up station discovery.
+A processed station metadata table used internally by the JP MLIT
+adapter. Coordinates from the official MLIT station pages are preferred
+when available. Coordinates from the supplied metadata CSV are used as a
+fallback.
 
 ## Usage
 
@@ -10,48 +13,53 @@ data(jp_mlit_meta)
 
 ## Format
 
-A tibble/data.frame with one row per station and typical columns:
+A tibble/data.frame with one row per station:
 
 - station_id:
 
-  MLIT station identifier (character)
+  MLIT station identifier (character).
 
 - station_name:
 
-  Station name (character)
+  English station name (character).
 
 - river:
 
-  River name, if available (character)
+  English river-system name (character).
 
 - lat:
 
-  Latitude in WGS84 (double)
+  Selected latitude in WGS84 decimal degrees (double).
 
 - lon:
 
-  Longitude in WGS84 (double)
+  Selected longitude in WGS84 decimal degrees (double).
 
-- area_km2:
+- area:
 
-  Drainage area in km^2, if available (double)
+  Drainage area in square kilometres, if available (double).
 
-- altitude_m:
+- altitude:
 
-  Altitude in meters, if available (double)
+  Gauge-zero elevation in metres, if available (double).
 
-- country:
+- station_name_original:
 
-  ISO country code (character)
+  Original Japanese station name (character).
 
-- provider_id:
+- lat_website:
 
-  Adapter provider id, e.g. `"JP_MLIT"` (character)
+  Latitude obtained from the official MLIT station page (double).
 
-- provider_name:
+- lon_website:
 
-  Provider name (character)
+  Longitude obtained from the official MLIT station page (double).
+
+- coordinate_source:
+
+  Source used for `lat` and `lon`. Either `"MLIT website"` or
+  `"MLIT metadata CSV"` (character).
 
 ## Source
 
-MLIT; see package README for licensing.
+Japan Ministry of Land, Infrastructure, Transport and Tourism (MLIT).

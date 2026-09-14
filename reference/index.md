@@ -2,6 +2,8 @@
 
 ## All functions
 
+- [`bafu_nawa_parameters()`](https://bafg-bund.github.io/hydrodownloadR/reference/bafu_nawa_parameters.md)
+  : Retrieve the complete BAFU NAWA Trend parameter catalogue
 - [`fi_syke_runoff_meta`](https://bafg-bund.github.io/hydrodownloadR/reference/fi_syke_runoff_meta.md)
   : SYKE runoff station metadata (area & altitude)
 - [`fr_hubeau_meta`](https://bafg-bund.github.io/hydrodownloadR/reference/fr_hubeau_meta.md)
