@@ -5,11 +5,12 @@ Authors@R: c(
     person("Henning", "Plessow", , "h.plessow@googlemail.com", role = c("aut", "cre")),
     person("Global Runoff Data Centre", , , "grdc@bafg.de", role = "ctb")
   )
-Description: Provides a unified, extensible interface to discover
-    hydrologic stations and download daily time series (e.g., water
-    discharge, water level, water temperature, and several other water
-    quality parameter) from national and regional public APIs. Includes a
-    provider registry, S3 generics 'stations' and 'timeseries', licensing
+Description: Provides a unified, extensible interface for discovering
+    hydrological stations and downloading hydrological daily time series (e.g., water
+    discharge, water level, water temperature) and discrete water-quality observations
+	from national and regional public APIs. Water-quality observations are retained 
+	at their original sampling timestamps.
+	Includes a provider registry, S3 generics 'stations' and 'timeseries', licensing
     metadata, date-range and 'complete history' modes, rate limiting and
     retries, optional authentication via environment variables, tidy
     outputs, UTF-8 to ASCII transliteration, and WGS84 coordinates.
@@ -19,7 +20,7 @@ Description: Provides a unified, extensible interface to discover
     <doi:10.5194/essd-17-4613-2025> and Farber et al. (2023)
     <doi:10.57757/IUGG23-2838>.
 License: MIT + file LICENSE
-URL: https://bafg-bund.github.io/hydrodownloadR/, https://github.com/bafg-bund/hydrodownloadR
+URL: https://hydrodownloadr.bafg.de/, https://github.com/bafg-bund/hydrodownloadR
 BugReports: https://github.com/bafg-bund/hydrodownloadR/issues
 Depends:
     R (>= 4.1.0)
@@ -28,7 +29,7 @@ Imports:
     dataRetrieval,
     DBI,
     dplyr,
-    httr,
+    httr2 (>= 1.1.0),
     httr2,
     jsonlite,
     lubridate,
