@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">hydrodownloadR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,22 @@
       <small>Source: <a href="https://github.com/bafg-bund/hydrodownloadR/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.5" id="hydrodownloadr-015">hydrodownloadR 0.1.5<a class="anchor" aria-label="anchor" href="#hydrodownloadr-015"></a></h2>
+<div class="section level3">
+<h3 id="resubmission-0-1-5">Resubmission<a class="anchor" aria-label="anchor" href="#resubmission-0-1-5"></a></h3>
+<p>This is a resubmission. In this version I have:</p>
+<ul><li>fixed a small bug in the MX_CONAGUA station metadata parser where the basin field was removed too aggressively although it is still used internally as the river field.</li>
+<li>kept the public station metadata output aligned with the package-wide station schema by omitting provider-specific columns.</li>
+<li>Removed the unfinished adapters AR_SNIH, BO_SENAMHI, ICPDR_DANUBEHIS, and IN_NWDP, which are still under development and will be included in a future release. <em>Removed an unused package import (openssl). </em>Cleaned the package namespace and regenerated the documentation.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="r-cmd-check-results-0-1-5">R CMD check results<a class="anchor" aria-label="anchor" href="#r-cmd-check-results-0-1-5"></a></h3>
+<p>0 errors | 0 warnings | 1 NOTE</p>
+<p>Remaining NOTE:</p>
+<p>unable to verify current time (Windows-specific check environment)</p>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.4" id="hydrodownloadr-014">hydrodownloadR 0.1.4<a class="anchor" aria-label="anchor" href="#hydrodownloadr-014"></a></h2>
 <div class="section level3">

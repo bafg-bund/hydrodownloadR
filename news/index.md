@@ -1,5 +1,29 @@
 # Changelog
 
+## hydrodownloadR 0.1.5
+
+### Resubmission
+
+This is a resubmission. In this version I have:
+
+- fixed a small bug in the MX_CONAGUA station metadata parser where the
+  basin field was removed too aggressively although it is still used
+  internally as the river field.
+- kept the public station metadata output aligned with the package-wide
+  station schema by omitting provider-specific columns.
+- Removed the unfinished adapters AR_SNIH, BO_SENAMHI, ICPDR_DANUBEHIS,
+  and IN_NWDP, which are still under development and will be included in
+  a future release. *Removed an unused package import (openssl).*
+  Cleaned the package namespace and regenerated the documentation.
+
+### R CMD check results
+
+0 errors \| 0 warnings \| 1 NOTE
+
+Remaining NOTE:
+
+unable to verify current time (Windows-specific check environment)
+
 ## hydrodownloadR 0.1.4
 
 ### New data sources
