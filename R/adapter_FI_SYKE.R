@@ -361,25 +361,24 @@ timeseries.hydro_service_FI_SYKE <- function(x,
   # ID list (Paikka_Id via place_id) and chunking
   all_ids <- if (is.null(stations) || !length(stations)) {
     st <- stations.hydro_service_FI_SYKE(x)
-    st$place_id
+    all_ids  <- st$place_id
+    sort_ids <- unique(all_ids)
   } else {
     st <- stations.hydro_service_FI_SYKE(x)
 
     user_ids <- trimws(as.character(stations))
 
-    # match against place_id directly
+    # direct place_id matches
     is_place <- user_ids %in% st$place_id
 
-    # match against national station_id (Nro)
+    # station_id / Nro matches
     is_station <- user_ids %in% st$station_id
 
-    # resolve: keep place_id as-is, map station_id -> place_id
     resolved_ids <- c(
       user_ids[is_place],
       st$place_id[match(user_ids[is_station], st$station_id)]
     )
 
-    # warn for unknown ids
     unknown_ids <- user_ids[!(is_place | is_station)]
     if (length(unknown_ids)) {
       rlang::warn(
@@ -390,7 +389,8 @@ timeseries.hydro_service_FI_SYKE <- function(x,
       )
     }
 
-    unique(resolved_ids)
+    all_ids  <- unique(resolved_ids)
+    sort_ids <- unique(resolved_ids)
   }
 
   all_ids <- unique(trimws(as.character(stats::na.omit(all_ids))))
@@ -532,10 +532,31 @@ timeseries.hydro_service_FI_SYKE <- function(x,
 
   # preserves order / sorts
   res <- dplyr::bind_rows(lapply(id_chunks, fetch_chunk))
+  # attach station_id (Nro) and station metadata once
+  st_lu <- stations.hydro_service_FI_SYKE(x) |>
+    dplyr::select(place_id, station_id, area, altitude) |>
+    dplyr::distinct(place_id, .keep_all = TRUE)
+
+  res <- dplyr::left_join(res, st_lu, by = "place_id")
+
+  # clean possible duplicate columns from older joins
+  if ("area.x" %in% names(res) || "area.y" %in% names(res)) {
+    res$area <- dplyr::coalesce(res$area, res$area.x, res$area.y)
+    res <- dplyr::select(res, -dplyr::any_of(c("area.x", "area.y")))
+  }
+  if ("altitude.x" %in% names(res) || "altitude.y" %in% names(res)) {
+    res$altitude <- dplyr::coalesce(res$altitude, res$altitude.x, res$altitude.y)
+    res <- dplyr::select(res, -dplyr::any_of(c("altitude.x", "altitude.y")))
+  }
+
+  # place station_id after place_id
+  if (requireNamespace("dplyr", quietly = TRUE)) {
+    res <- dplyr::relocate(res, station_id, .after = place_id)
+  }
+
   if (nrow(res)) {
     if (!is.null(stations) && length(stations)) {
-      lvl <- unique(trimws(as.character(stations)))
-      res$place_id <- factor(res$place_id, levels = lvl)
+      res$place_id <- factor(res$place_id, levels = sort_ids)
       res <- res[order(res$place_id, res$timestamp), , drop = FALSE]
       res$place_id <- as.character(res$place_id)
     } else {
@@ -543,21 +564,15 @@ timeseries.hydro_service_FI_SYKE <- function(x,
     }
   }
 
-  # ---- Convert runoff (l/s/km2) -> discharge (m^3/s) ------------------------
-  # ---- Runoff: keep l/s/km2 AND add discharge (m^3/s) when area is known ----
+  # ---- Runoff: keep l/s/km2 AND add discharge (m^3/s) ------------------------
   if (nrow(res) && identical(parameter, "runoff")) {
-    meta <- get0("fi_syke_runoff_meta", inherits = TRUE)
-    if (!is.null(meta) && nrow(meta)) {
-      res <- dplyr::left_join(res, meta[, c("place_id","area"), drop = FALSE], by = "place_id")
-    } else {
-      # ensure 'area' column exists (NA) so downstream code is stable
-      if (!"area" %in% names(res)) res$area <- NA_real_
+    if (!"area" %in% names(res)) {
+      res$area <- NA_real_
     }
 
-    # m^3/s = (l/s/km^2 * km^2) / 1000 ; will be NA if area is NA
+    # m^3/s = (l/s/km^2 * km^2) / 1000
     res$discharge_m3s <- (res$value * res$area) / 1000
 
-    # place area + discharge after unit
     if (requireNamespace("dplyr", quietly = TRUE)) {
       res <- dplyr::relocate(res, area, discharge_m3s, .after = unit)
     }
