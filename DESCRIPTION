@@ -33,7 +33,6 @@ Imports:
     httr2 (>= 1.1.0),
     jsonlite,
     lubridate,
-	openssl,
     pdftools,
     progress,
     rappdirs,
