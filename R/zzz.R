@@ -29,7 +29,7 @@
   # register_KR_WAMIS()
   register_ES_ROAN()
   register_AR_INA()
-  register_AR_SNIH()
+  # register_AR_SNIH()
   register_BA_AVPS()
   register_ES_CEDEX()
   register_MX_CONAGUA()
@@ -42,5 +42,5 @@
   register_IL_IWA()
   register_CH_BAFU_NAWA()
   # register_BO_SENAMHI()
-  register_ICPDR_DANUBEHIS()
+  # register_ICPDR_DANUBEHIS()
 }
