@@ -7,11 +7,16 @@
 #   - converts DMS lat/lon to decimal WGS84,
 #   - stores `jp_mlit_meta` as an internal package dataset.
 
-# 0) Path to raw metadata ------------------------------------------------------
+# 0) Paths to raw metadata -----------------------------------------------------
 
 jp.md.file <- file.path(
   "data-raw",
   "Specifications of Water Level and Discharge Observation Stations_20251222.csv"
+)
+
+jp.coordinates.file <- file.path(
+  "data-raw",
+  "jp_mlit_station_coordinates.csv"
 )
 
 # 1) Read raw metadata ---------------------------------------------------------
@@ -38,6 +43,47 @@ jp.md <- jp.raw |>
     catchment_area_km2 = 12,
     distance_from_mouth_or_confluence_km = 13
   )
+
+# 1b) Read coordinates from official MLIT station pages -----------------------
+
+if (!file.exists(jp.coordinates.file)) {
+  stop(
+    "Official MLIT coordinate file not found: ",
+    jp.coordinates.file,
+    call. = FALSE
+  )
+}
+
+jp.coordinates <- readr::read_csv(
+  jp.coordinates.file,
+  col_types = readr::cols(
+    id  = readr::col_character(),
+    lat = readr::col_double(),
+    lon = readr::col_double()
+  )
+) |>
+  dplyr::transmute(
+    station_id  = trimws(id),
+    lat_website = lat,
+    lon_website = lon
+  )
+
+# Station IDs must be unique before joining.
+duplicate_coordinate_ids <- jp.coordinates |>
+  dplyr::count(station_id, name = "n") |>
+  dplyr::filter(n > 1L)
+
+if (nrow(duplicate_coordinate_ids) > 0L) {
+  stop(
+    "The official MLIT coordinate file contains duplicate station IDs. ",
+    "Examples: ",
+    paste(
+      utils::head(duplicate_coordinate_ids$station_id, 10L),
+      collapse = ", "
+    ),
+    call. = FALSE
+  )
+}
 
 # 2) Single-string translation via OpenAI --------------------------------------
 
@@ -120,30 +166,70 @@ openai_translate_vec_unique <- function(
 jp.md$watersystem_name_en <- openai_translate_vec_unique(jp.md$watersystem_name)
 jp.md$station_name_en     <- openai_translate_vec_unique(jp.md$station_name)
 
-# 5) Build jp_mlit_meta with WGS84 coords --------------------------------------
+# 5) Build jp_mlit_meta with both coordinate sources ---------------------------
 
 jp_mlit_meta <- jp.md |>
   dplyr::mutate(
-    # numeric conversion for all relevant columns
     dplyr::across(
-      c(lat_deg, lat_min, lat_sec,
-        lon_deg, lon_min, lon_sec,
-        catchment_area_km2, gauge_zero_m),
-      ~ suppressWarnings(as.numeric(.))
-    )
+      c(
+        lat_deg,
+        lat_min,
+        lat_sec,
+        lon_deg,
+        lon_min,
+        lon_sec,
+        catchment_area_km2,
+        gauge_zero_m
+      ),
+      ~ suppressWarnings(as.numeric(.x))
+    ),
+    station_id = trimws(as.character(station_id))
   ) |>
   dplyr::mutate(
-    # Japan is in the NE quadrant → no sign flip needed
-    lat = lat_deg + lat_min / 60 + lat_sec / 3600,
-    lon = lon_deg + lon_min / 60 + lon_sec / 3600,
+    # Coordinates supplied in the metadata CSV.
+    lat_csv = lat_deg +
+      lat_min / 60 +
+      lat_sec / 3600,
+
+    lon_csv = lon_deg +
+      lon_min / 60 +
+      lon_sec / 3600,
 
     area     = catchment_area_km2,
     altitude = gauge_zero_m,
 
-    # naming for adapter:
-    station_name_original = station_name,      # Japanese
-    station_name          = station_name_en,   # English
+    station_name_original = station_name,
+    station_name          = station_name_en,
     river                 = watersystem_name_en
+  ) |>
+  dplyr::left_join(
+    jp.coordinates,
+    by = "station_id"
+  ) |>
+  dplyr::mutate(
+    # Only use website coordinates when both latitude and longitude exist.
+    website_coordinates_available =
+      !is.na(lat_website) &
+      !is.na(lon_website),
+
+    # Selected coordinates used by the adapter.
+    lat = dplyr::if_else(
+      website_coordinates_available,
+      lat_website,
+      lat_csv
+    ),
+
+    lon = dplyr::if_else(
+      website_coordinates_available,
+      lon_website,
+      lon_csv
+    ),
+
+    coordinate_source = dplyr::case_when(
+      website_coordinates_available ~ "MLIT website",
+      !is.na(lat_csv) & !is.na(lon_csv) ~ "MLIT metadata CSV",
+      TRUE ~ NA_character_
+    )
   ) |>
   dplyr::select(
     station_id,
@@ -153,7 +239,12 @@ jp_mlit_meta <- jp.md |>
     lon,
     area,
     altitude,
-    station_name_original
+    station_name_original,
+    lat_csv,
+    lon_csv,
+    lat_website,
+    lon_website,
+    coordinate_source
   )
 
 #  6) Store as ~/data/jp_mlit_meta.rda -----------------------------------------
