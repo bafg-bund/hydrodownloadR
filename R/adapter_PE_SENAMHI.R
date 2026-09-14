@@ -1,5 +1,5 @@
 # R/adapter_PE_SENAMHI.R
-# Servicio Nacional de Meteorología e Hidrología del Perú - SENAMHI
+# Servicio Nacional de Meteorología e Hidrologia del Peru - SENAMHI
 #
 # provider_usage.R classification:
 #   access_class = "public"
@@ -10,8 +10,8 @@
 # an explicit open-data licence or a clear grant to redistribute the raw data.
 # Terms: https://www.senamhi.gob.pe/?p=terminos-condiciones
 # Required source notice (as published by SENAMHI):
-#   "Información recopilada y trabajada por el Servicio Nacional de
-#   Meteorología e Hidrología del Perú. El uso que se le da a esta información
+#   "Informacion recopilada y trabajada por el Servicio Nacional de
+#   Meteorologia e Hidrologia del Peru. El uso que se le da a esta informacion
 #   es de mi (nuestra) entera responsabilidad".
 #
 # The station catalogue is an official WFS service. Daily discharge and water
@@ -28,8 +28,8 @@ register_PE_SENAMHI <- function() {
   register_service_usage(
     provider_id   = "PE_SENAMHI",
     provider_name = paste0(
-      "Servicio Nacional de Meteorología e Hidrología ",
-      "del Perú - SENAMHI"
+      "Servicio Nacional de Meteorologia e Hidrologia ",
+      "del Peru - SENAMHI"
     ),
     country       = "Peru",
     base_url      = "https://www.senamhi.gob.pe",

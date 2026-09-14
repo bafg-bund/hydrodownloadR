@@ -8,7 +8,7 @@
 register_PT_SNIRH <- function() {
   register_service_usage(
     provider_id   = "PT_SNIRH",
-    provider_name = "Agência Portuguesa do Ambiente - SNIRH",
+    provider_name = "Agencia Portuguesa do Ambiente - SNIRH",
     country       = "Portugal",
     base_url      = "https://snirh.apambiente.pt",
     rate_cfg      = list(n = 1, period = 1),
@@ -667,7 +667,7 @@ stations.hydro_service_PT_SNIRH <- function(x, ...) {
   }
 
   unit <- trimws(unit[[2]])
-  normalized <- gsub("³", "3", unit, fixed = TRUE)
+  normalized <- gsub("<c2><b3>", "3", unit, fixed = TRUE)
   normalized <- tolower(gsub("[[:space:]^]", "", normalized))
 
   if (normalized %in% c("m3/s", "m3s-1", "m3s")) {

@@ -70,10 +70,11 @@ register_CH_BAFU_NAWA <- function() {
 .ch_nawa_parameter_english <- function(measured_parameter) {
   value <- trimws(normalize_utf8(as.character(measured_parameter)))
   value[value %in% c("", "---")] <- NA_character_
-
+  ae <- intToUtf8(0x00E4)
+  ue <- intToUtf8(0x00FC)
   translations <- c(
     "Abfiltrierbare Stoffe" = "Total suspended solids",
-    "Alkalinit\u00E4t pH4.5" = "Alkalinity (pH 4.5)",
+    setNames("Alkalinity (pH 4.5)", paste0("Alkalinit", ae, "t pH4.5")),
     "Ammonium" = "Ammonium",
     "Ammonium-Stickstoff" = "Ammonium nitrogen",
     "Bromid" = "Bromide",
@@ -82,13 +83,14 @@ register_CH_BAFU_NAWA <- function() {
     "Chlorid" = "Chloride",
     "CSB" = "Chemical oxygen demand (COD)",
     "DOC" = "Dissolved organic carbon (DOC)",
-    "Elektrische Leitf\u00E4higkeit" = "Electrical conductivity",
+    setNames("Electrical conductivity",
+             paste0("Elektrische Leitf", ae, "higkeit")),
     "Fluorid" = "Fluoride",
-    "Gesamth\u00E4rte" = "Total hardness",
+    setNames("Total hardness", paste0("Gesamth", ae, "rte")),
     "Gesamtphosphor (unfiltriert)" = "Total phosphorus (unfiltered)",
     "Gesamtstickstoff (unfiltriert)" = "Total nitrogen (unfiltered)",
     "Kalium" = "Potassium",
-    "Karbonath\u00E4rte" = "Carbonate hardness",
+    setNames("Carbonate hardness", paste0("Karbonath", ae, "rte")),
     "Lufttemperatur" = "Air temperature",
     "Magnesium" = "Magnesium",
     "Natrium" = "Sodium",
@@ -103,10 +105,11 @@ register_CH_BAFU_NAWA <- function() {
     "Phosphat-Phosphor" = "Phosphate phosphorus",
     "pH-Wert" = "pH",
     "Sauerstoff" = "Dissolved oxygen",
-    "Sauerstoff-S\u00E4ttigung" = "Oxygen saturation",
+    setNames("Oxygen saturation",
+             paste0("Sauerstoff-S", ae, "ttigung")),
     "Sulfat" = "Sulfate",
     "TOC" = "Total organic carbon (TOC)",
-    "Tr\u00FCbung" = "Turbidity",
+    setNames("Turbidity", paste0("Tr", ue, "bung")),
     "Wassertemperatur" = "Water temperature",
     "Aluminium" = "Aluminium",
     "Antimon" = "Antimony",
@@ -856,7 +859,7 @@ bafu_nawa_parameters <- function(x, ...) {
   tibble::tibble(
     # The data filter uses measuredParameter, whose values are the German
     # designations, not the catalogue's compact parameterId values (for
-    # example, "Elektrische Leitfähigkeit" rather than "el_Lf").
+    # example, "Elektrische Leitfaehigkeit" rather than "el_Lf").
     provider_parameter = normalize_utf8(
       .ch_nawa_pluck_chr(rows, "germanDesignation")
     ),

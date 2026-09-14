@@ -686,8 +686,8 @@ stations.hydro_service_AF_USGS_USAID <- function(x, ...) {
 #' @export
 timeseries.hydro_service_AF_USGS_USAID <- function(
     x,
-    stations = NULL,
     parameter = "water_discharge",
+    stations = NULL,
     start_date = NULL,
     end_date = NULL,
     mode = c("range", "complete"),

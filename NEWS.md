@@ -1,3 +1,33 @@
+# hydrodownloadR 0.1.4
+
+## New data sources
+
+* Added support for hydrological data providers in Afghanistan, Colombia,
+  Israel, Mexico, Peru, and Portugal.
+* Added water-quality data support for Switzerland.
+
+## Improvements
+
+* Japan MLIT station coordinates are now retrieved from the official MLIT
+  website, with packaged metadata used as a fallback.
+* Switzerland now uses the official BAFU API at data.bafu.admin.ch.
+* Added station identifiers to time-series output.
+* Added `quality_name` and `quality_desc` to time-series output for improved
+  consistency across providers.
+* Chile now supports flexible date ranges.
+* Improved database update handling for Canada.
+* Updated provider base URLs for Austria and Finland.
+* Improved rate limiting for Brazil and fixed the `mdbtools` fallback on macOS.
+* Adapted the Netherlands provider to API changes.
+* Restricted the Denmark HTTP/1.1 workaround to Unix/HPC systems.
+* Improved dynamic provider registry handling.
+
+## Bug fixes
+
+* Corrected Poland timestamps affected by hydrological-year handling.
+* Fixed an export URL.
+
+
 # hydrodownloadR 0.1.3
 * add script for US_USGS_XXX that builds compact USGS station metadata bundle for hydrodownloadRdata release asset
 * update USGS metadata cache
