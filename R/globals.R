@@ -31,6 +31,30 @@ utils::globalVariables(c(
   "river", "river_ascii", "river_name",
   "station_name.x", "station_name.y",
   "lat.x", "lat.y", "lon.x", "lon.y",
-  "area_km2_rio"
+  "area_km2_rio",
+
+  ".cal_month",
+  ".cal_year",
+  "basin",
+  "cuenca",
+  "dataset_id",
+  "dataset_priority",
+  "determination_limit",
+  "device_method",
+  "field_or_lab",
+  "measurement_uncertainty",
+  "measurement_uncertainty_type",
+  "name_key",
+  "nawa_detection_limit",
+  "parameter_priority",
+  "quality_desc",
+  "quality_name",
+  "sampling_duration_hours",
+  "sampling_start",
+  "source_file",
+  "station_key",
+  "sub_basin",
+  "sub_parameter",
+  "timestamp_source"
 
 ))
