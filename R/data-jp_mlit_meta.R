@@ -1,21 +1,50 @@
 #' Japan MLIT stations metadata snapshot
 #'
-#' A tibble used by the JP MLIT adapter to speed up station discovery.
+#' A processed station metadata table used internally by the JP MLIT adapter.
+#' Coordinates from the official MLIT station pages are preferred when
+#' available. Coordinates from the supplied metadata CSV are used as a
+#' fallback.
 #'
-#' @format A tibble/data.frame with one row per station and typical columns:
+#' @format A tibble/data.frame with one row per station:
 #' \describe{
-#'   \item{station_id}{MLIT station identifier (character)}
-#'   \item{station_name}{Station name (character)}
-#'   \item{river}{River name, if available (character)}
-#'   \item{lat}{Latitude in WGS84 (double)}
-#'   \item{lon}{Longitude in WGS84 (double)}
-#'   \item{area_km2}{Drainage area in km^2, if available (double)}
-#'   \item{altitude_m}{Altitude in meters, if available (double)}
-#'   \item{country}{ISO country code (character)}
-#'   \item{provider_id}{Adapter provider id, e.g. \code{"JP_MLIT"} (character)}
-#'   \item{provider_name}{Provider name (character)}
+#'   \item{station_id}{
+#'     MLIT station identifier (character).
+#'   }
+#'   \item{station_name}{
+#'     English station name (character).
+#'   }
+#'   \item{river}{
+#'     English river-system name (character).
+#'   }
+#'   \item{lat}{
+#'     Selected latitude in WGS84 decimal degrees (double).
+#'   }
+#'   \item{lon}{
+#'     Selected longitude in WGS84 decimal degrees (double).
+#'   }
+#'   \item{area}{
+#'     Drainage area in square kilometres, if available (double).
+#'   }
+#'   \item{altitude}{
+#'     Gauge-zero elevation in metres, if available (double).
+#'   }
+#'   \item{station_name_original}{
+#'     Original Japanese station name (character).
+#'   }
+#'   \item{lat_website}{
+#'     Latitude obtained from the official MLIT station page (double).
+#'   }
+#'   \item{lon_website}{
+#'     Longitude obtained from the official MLIT station page (double).
+#'   }
+#'   \item{coordinate_source}{
+#'     Source used for \code{lat} and \code{lon}. Either
+#'     \code{"MLIT website"} or \code{"MLIT metadata CSV"} (character).
+#'   }
 #' }
-#' @source MLIT; see package README for licensing.
+#'
+#' @source Japan Ministry of Land, Infrastructure, Transport and Tourism
+#'   (MLIT).
 #' @keywords datasets
 #' @name jp_mlit_meta
 #' @docType data
