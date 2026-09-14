@@ -263,6 +263,28 @@ timeseries_parameters.hydro_service_CL_DGA <- function(x, ...) {
   )
 }
 
+.cl_cr2_normalize_export_url <- function(url,
+                                         base_url = "https://explorador.cr2.cl/") {
+  url <- trimws(as.character(url))
+
+  if (!length(url) || is.na(url) || !nzchar(url)) {
+    return(NA_character_)
+  }
+
+  # protocol-relative URL, e.g. //explorador.cr2.cl/tmp/...
+  if (grepl("^//", url)) {
+    return(paste0("https:", url))
+  }
+
+  # already absolute
+  if (grepl("^https?://", url, ignore.case = TRUE)) {
+    return(url)
+  }
+
+  # relative path, e.g. tmp/map_xxx/EC_series.csv
+  xml2::url_absolute(url, base_url)
+}
+
 
 #' @export
 stations.hydro_service_CL_DGA <- function(x, ...) {
@@ -399,12 +421,12 @@ stations.hydro_service_CL_DGA <- function(x, ...) {
 # -----------------------------------------------------------------------------
 
 .cl_cr2_download_q_daily <- function(site) {
-  # site: DGA station code as character, e.g. "09140001"
   site <- trimws(as.character(site))
 
-  # Use a dynamic end timestamp instead of the old hard-coded 2021 value.
-  # Add one day to avoid timezone edge cases.
-  end_epoch <- as.integer(as.POSIXct(Sys.Date() + 1, tz = "UTC"))
+  end_epoch <- as.integer(as.POSIXct(Sys.Date(), tz = "UTC"))
+
+  # ASCII source, but actual UTF-8 at runtime
+  months_txt <- "A\u00f1o completo"
 
   options_str <- paste0(
     "{",
@@ -412,7 +434,7 @@ stations.hydro_service_CL_DGA <- function(x, ...) {
     "\"intv\":\"daily\",\"season\":\"year\",\"stat\":\"mean\",",
     "\"minFrac\":80},",
     "\"time\":{\"start\":-946771200,\"end\":", end_epoch, ",",
-    "\"months\":\"A\\u00f1o completo\"},",
+    "\"months\":\"", months_txt, "\"},",
     "\"anomaly\":{\"enabled\":false,\"type\":\"dif\",\"rank\":\"no\",",
     "\"start_year\":1980,\"end_year\":2010,\"minFrac\":70},",
     "\"map\":{\"stat\":\"mean\",\"minFrac\":10,",
@@ -422,26 +444,28 @@ stations.hydro_service_CL_DGA <- function(x, ...) {
     "\"series\":{\"sites\":[\"", site, "\"],\"start\":null,\"end\":null},",
     "\"export\":{\"map\":\"Shapefile\",\"series\":\"CSV\",",
     "\"view\":{\"frame\":\"Vista Actual\",\"map\":\"roadmap\",",
-    "\"clat\":-38.148818103572275,",
-    "\"clon\":-76.04504453124999,",
-    "\"zoom\":5,\"width\":579,\"height\":628}},",
+    "\"clat\":-17.9942,\"clon\":-69.255,",
+    "\"zoom\":8,\"width\":652,\"height\":602}},",
     "\"action\":[\"export_series\"]",
     "}"
   )
 
   website <- paste0(
     "https://explorador.cr2.cl/request.php?options=",
-    utils::URLencode(options_str, reserved = TRUE)
+    curl::curl_escape(enc2utf8(options_str))
   )
 
-  Sys.sleep(0.25)
+  # Debug check: should be TRUE
+  # grepl("A%C3%B1o", website)
 
-  # --------------------------------------------------------------------------
-  # 1) Ask CR2 for the temporary CSV URL
-  # --------------------------------------------------------------------------
   req <- httr2::request(website) |>
     httr2::req_user_agent(
       "hydrodownloadR (+https://github.com/bafg-bund/hydrodownloadR)"
+    ) |>
+    httr2::req_headers(
+      Accept = "application/json, text/javascript, */*; q=0.01",
+      Referer = "https://explorador.cr2.cl/",
+      `X-Requested-With` = "XMLHttpRequest"
     ) |>
     httr2::req_timeout(60)
 
@@ -456,26 +480,27 @@ stations.hydro_service_CL_DGA <- function(x, ...) {
     return(tibble::tibble())
   }
 
-  if (length(js$errors) > 0) {
-    rlang::warn(paste0(
-      "CL_DGA/CR2: response contains errors for station ", site, ": ",
-      paste(js$errors, collapse = "; ")
-    ))
-    return(tibble::tibble())
-  }
-
   csv_url <- js$export$series$url
 
-  if (is.null(csv_url) || !nzchar(csv_url)) {
+  if (is.null(csv_url) || !length(csv_url)) {
     rlang::warn(paste0(
       "CL_DGA/CR2: no CSV URL in response for station ", site
     ))
     return(tibble::tibble())
   }
 
-  # --------------------------------------------------------------------------
-  # 2) Read the temporary CSV via httr2, not utils::download.file()
-  # --------------------------------------------------------------------------
+  csv_url <- .cl_cr2_normalize_export_url(
+    csv_url,
+    base_url = "https://explorador.cr2.cl/"
+  )
+
+  if (is.na(csv_url) || !nzchar(csv_url)) {
+    rlang::warn(paste0(
+      "CL_DGA/CR2: invalid CSV URL in response for station ", site
+    ))
+    return(tibble::tibble())
+  }
+
   read_csv_httr2 <- function(url) {
     tmp <- tempfile(fileext = ".csv")
 
@@ -483,8 +508,10 @@ stations.hydro_service_CL_DGA <- function(x, ...) {
       httr2::req_user_agent(
         "hydrodownloadR (+https://github.com/bafg-bund/hydrodownloadR)"
       ) |>
-      httr2::req_timeout(60) |>
-      httr2::req_retry(max_tries = 3)
+      httr2::req_headers(
+        Referer = "https://explorador.cr2.cl/"
+      ) |>
+      httr2::req_timeout(60)
 
     resp_csv <- perform_request(req_csv)
     writeBin(httr2::resp_body_raw(resp_csv), tmp)
@@ -497,8 +524,7 @@ stations.hydro_service_CL_DGA <- function(x, ...) {
 
   out <- try(read_csv_httr2(csv_url), silent = TRUE)
 
-  # Some R/curl setups fail SSL on www.explorador.cr2.cl.
-  # Try the same temporary path without "www.".
+  # fallback without www
   if (inherits(out, "try-error")) {
     csv_url2 <- sub(
       "^https://www\\.explorador\\.cr2\\.cl",
@@ -508,6 +534,9 @@ stations.hydro_service_CL_DGA <- function(x, ...) {
 
     if (!identical(csv_url2, csv_url)) {
       out <- try(read_csv_httr2(csv_url2), silent = TRUE)
+      if (!inherits(out, "try-error")) {
+        csv_url <- csv_url2
+      }
     }
   }
 
